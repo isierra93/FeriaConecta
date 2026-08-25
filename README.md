@@ -1,1 +1,72 @@
 # FeriaConecta
+
+**Plataforma web para organizar ferias y conectar emprendedores**
+
+Trabajo Final Integrador — Tecnicatura en Programación (UTN) • Agosto 2026
+
+> **Idea principal:** centralizar en un solo sistema la creación de ferias, la inscripción de emprendedores, la asignación de puestos y el control de asistencia.
+
+---
+
+## 1. Problema y objetivo
+
+La organización de ferias suele realizarse mediante formularios, planillas, mensajes de WhatsApp y anotaciones separadas. Esto dificulta controlar los cupos, saber qué emprendedores fueron aprobados, asignar puestos sin errores y conservar un historial de cada evento.
+
+FeriaConecta busca ordenar ese proceso y facilitar la comunicación entre organizadores y emprendedores. También ofrecerá una vista pública para que cualquier persona pueda consultar las próximas ferias y los emprendimientos participantes.
+
+**Usuarios:** organizador o administrador, emprendedor y público general.
+
+## 2. Alcance de la primera versión
+
+1. Registro e inicio de sesión con roles y permisos.
+2. Perfiles de emprendedores con datos de contacto, descripción y rubro.
+3. Gestión de ferias: fechas, ubicación, cupos, categorías y estado.
+4. Postulación de emprendedores y evaluación por parte del organizador.
+5. Creación de puestos y asignación de cada espacio a un participante aprobado.
+6. Listado público de ferias y estadísticas básicas para el organizador.
+
+## 3. Flujo principal de funcionamiento
+
+1. El organizador crea una feria y define sus datos, rubros permitidos y cantidad de puestos.
+2. El emprendedor completa su perfil y envía una postulación.
+3. El organizador revisa la solicitud y la aprueba o rechaza.
+4. A los emprendimientos aprobados se les asigna un puesto.
+5. El emprendedor confirma su participación y el organizador registra la asistencia.
+6. La información queda guardada para consultar el historial y obtener estadísticas.
+
+## 4. Implementación propuesta
+
+Se desarrollará como una aplicación web responsive. El frontend consumirá una API REST creada con Spring Boot y la información se almacenará en PostgreSQL. La seguridad se manejará mediante autenticación con JWT y permisos según el rol del usuario.
+
+Para mantener el proyecto ordenado se utilizará un **monolito modular** y un único repositorio de GitHub, separado en carpetas de frontend, backend y documentación. El sistema se publicará en servicios en la nube para que pueda probarse en línea durante las entregas.
+
+## 5. Stack tecnológico
+
+| Componente | Tecnología propuesta |
+|---|---|
+| **Frontend** | React, Vite, TypeScript, HTML y CSS |
+| **Backend** | Java 21, Spring Boot y API REST |
+| **Base de datos** | MySQL con Spring Data JPA / Hibernate |
+| **Seguridad** | Spring Security y JWT |
+| **Pruebas y documentación** | JUnit, Mockito, Postman y Swagger / OpenAPI |
+| **Despliegue** | VPS |
+
+## 6. Límites y posibles mejoras
+
+La primera versión **no** incluirá:
+
+- Pagos en línea
+- Mensajería automática
+- Mapas interactivos
+
+**Mejoras posteriores:**
+
+- Código QR para validar la asistencia
+- Notificaciones por correo
+- Plano visual de los puestos
+
+---
+
+### Resultado esperado
+
+Un sistema funcional que reduzca tareas manuales, evite asignaciones duplicadas y permita seguir el estado completo de cada feria.
