@@ -56,12 +56,22 @@ El sistema se despliega en dos entornos distintos según el componente, aprovech
 |---|---|
 | **Frontend** | React, Vite, TypeScript, HTML y CSS |
 | **Backend** | Java 21, Spring Boot y API REST |
-| **Base de datos** | MySQL con Spring Data JPA / Hibernate, migraciones con Flyway |
+| **Base de datos** | MySQL con Spring Data JPA / Hibernate |
 | **Seguridad** | Spring Security y JWT |
 | **Pruebas y documentación** | JUnit, Mockito, Postman y Swagger / OpenAPI |
 | **Despliegue** | Backend y base de datos: VPS Oracle (Docker + Portainer + Nginx Proxy Manager). Frontend: Vercel (CI/CD desde GitHub) 
 
-## 6. Límites y posibles mejoras
+## 6. Estructura del repositorio
+
+```
+/frontend      → proyecto React
+/backend       → proyecto Spring Boot
+/database      → scripts DDL, diagrama ER
+/docs          → informes y entregas
+README.md
+```
+
+## 7. Límites y posibles mejoras
 
 La primera versión **no** incluirá:
 
