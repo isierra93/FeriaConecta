@@ -40,6 +40,16 @@ Se desarrollará como una aplicación web responsive. El frontend consumirá una
 
 Para mantener el proyecto ordenado se utilizará un **monolito modular** y un único repositorio de GitHub, separado en carpetas de frontend, backend y documentación. El sistema se publicará en servicios en la nube para que pueda probarse en línea durante las entregas.
 
+### 4.1 Arquitectura de despliegue
+ 
+El sistema se despliega en dos entornos distintos según el componente, aprovechando infraestructura propia para el backend/datos y una plataforma especializada para el frontend:
+ 
+| Componente | Dónde se despliega | Detalle |
+|---|---|---|
+| **Backend (Spring Boot)** | VPS propio (Oracle Cloud) | Contenedor Docker gestionado desde **Portainer**, corriendo sobre Docker Engine. Expone su puerto interno (8080) únicamente dentro de la red Docker del stack — no se expone directamente a internet. |
+| **Base de datos (MySQL)** | Mismo VPS (Oracle Cloud) | Contenedor MySQL ya operativo, con volumen persistente para los datos. Accesible solo por red interna Docker desde el contenedor del backend (nombre de servicio, no IP pública). |
+| **Frontend (React)** | Vercel | Build estático (Vite) desplegado con CI/CD automático desde GitHub (cada push a `main` dispara un nuevo deploy). Consume la API pública vía HTTPS. |
+
 ## 5. Stack tecnológico
 
 | Componente | Tecnología propuesta |
