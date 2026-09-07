@@ -51,15 +51,15 @@ El sistema se despliega en dos entornos distintos según el componente, aprovech
 | **Frontend (React)** | Vercel | Build estático (Vite) desplegado con CI/CD automático desde GitHub (cada push a `main` dispara un nuevo deploy). Consume la API pública vía HTTPS. |
 
 ## 5. Stack tecnológico
-
+ 
 | Componente | Tecnología propuesta |
 |---|---|
 | **Frontend** | React, Vite, TypeScript, HTML y CSS |
 | **Backend** | Java 21, Spring Boot y API REST |
-| **Base de datos** | MySQL con Spring Data JPA / Hibernate |
+| **Base de datos** | MySQL con Spring Data JPA / Hibernate, migraciones con Flyway |
 | **Seguridad** | Spring Security y JWT |
 | **Pruebas y documentación** | JUnit, Mockito, Postman y Swagger / OpenAPI |
-| **Despliegue** | VPS |
+| **Despliegue** | Backend y base de datos: VPS Oracle (Docker + Portainer + Nginx Proxy Manager). Frontend: Vercel (CI/CD desde GitHub) 
 
 ## 6. Límites y posibles mejoras
 
