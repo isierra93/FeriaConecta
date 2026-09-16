@@ -64,11 +64,13 @@ El sistema se despliega en dos entornos distintos según el componente, aprovech
 | **Frontend (React)** | Vercel | Build estático (Vite) desplegado con CI/CD automático desde GitHub (cada push a `main` dispara un nuevo deploy). Consume la API pública vía HTTPS. |
 
 ### 4.2. Integración con la API GeoRef
-
-Se utilizará **GeoRef**, el Servicio de Normalización de Datos Geográficos de Argentina, como API REST externa. Su función será asistir el autocompletado y validar o normalizar las ubicaciones ingresadas al crear una feria.
-
+ 
+Se utilizará **GeoRef**, el Servicio de Normalización de Datos Geográficos de Argentina, como API REST externa. Su función será asistir el autocompletado y validar o normalizar **la dirección de la feria** (provincia, municipio, localidad, calle) al momento de crearla — nunca la ubicación de un puesto individual.
+ 
+> **Aclaración de alcance:** GeoRef trabaja sobre divisiones geográficas y direcciones reales (provincia → localidad → calle), por lo que solo aplica a **dónde se realiza la feria en su conjunto**. Los puestos (stand 1, stand 2, etc.) no tienen una ubicación geográfica propia: son posiciones dentro del layout interno del evento, identificadas por número/código, sin relación con GeoRef. La distribución visual de puestos dentro de una feria queda fuera del alcance de la v1 (ver sección 8, "plano visual de los puestos" como mejora futura).
+ 
 La integración podrá consultar provincias, municipios, localidades, calles y direcciones. La comunicación con GeoRef se realizará desde el backend para centralizar su uso y evitar que el frontend dependa directamente del servicio externo.
-
+ 
 - **Documentación oficial:** [Referencia completa de la API GeoRef V2](https://www.argentina.gob.ar/georef/referencia-completa-de-la-api-georef-v-2)
 - **URL base utilizada por la aplicación:** `https://apis.datos.gob.ar/georef/api/v2.0/`
 
