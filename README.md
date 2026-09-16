@@ -93,7 +93,11 @@ La integración podrá consultar provincias, municipios, localidades, calles y d
 README.md
 ```
 
-## 7. Límites y posibles mejoras
+## 7. Seguimiento del proyecto
+ 
+El desarrollo se organiza en sprints mediante [GitHub Projects](https://github.com/users/isierra93/projects/2/views/1), con Issues vinculados a cada funcionalidad del alcance (sección 2) y Milestones por etapa. El historial completo de commits y decisiones técnicas queda documentado en este repositorio.
+
+## 8. Límites y posibles mejoras
 
 La primera versión **no** incluirá:
 
