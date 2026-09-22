@@ -33,6 +33,9 @@ FeriaConecta busca digitalizar y ordenar el proceso completo, desde la publicaci
 1. Registro e inicio de sesión con roles y permisos.
 2. Perfiles de emprendedores con datos de contacto, descripción y rubro.
 3. Gestión de ferias: fechas, ubicación, costo de participación, cupos, categorías y estado.
+   > **Decisión de alcance (v1):** cada feria admite una sola categoría principal (`categoria_permitida`).
+   > El rubro declarado por el emprendedor en la postulación se coteja contra esa categoría por coincidencia.
+   > Si en una versión posterior se requieren múltiples categorías por feria, se migrará a una tabla `feria_categoria`.
 4. Postulación de emprendedores y evaluación por parte del organizador.
 5. Pago de la participación mediante Mercado Pago para las postulaciones aprobadas.
 6. Confirmación automática de la participación después de verificar el pago.
