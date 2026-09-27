@@ -1,8 +1,10 @@
-# Entrega 3 — Diseño y Módulos
+# Diseño y Módulos
 
-**Trabajo Final Integrador — Tecnicatura en Programación (UTN)**
 **Fecha de entrega:** 27/09/2026
+
 **Integrantes:** Victor Ivan Sierra · Facundo Miguel Archiria · Nahuel Alfredo Ayala
+
+
 **Tutor:** Sebastián Bruselario
 
 ---
