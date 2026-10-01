@@ -1,86 +1,101 @@
-# Diagrama Entidad-Relación — sincronizado con `schema.sql` (Etapa 3)
+# Diagrama Entidad-Relación Conceptual (UML)
 
-Basado en las entidades y estados del `database/schema.sql`, sincronizado con la sección 4.5 del `README.md`.
+Modelo conceptual del dominio de FeriaConecta, independiente de cualquier tecnología de base de datos.
 
 ```mermaid
-erDiagram
-    USUARIO ||--o{ FERIA : "organiza"
-    USUARIO ||--o{ POSTULACION : "presenta (como emprendedor)"
-    FERIA ||--o{ POSTULACION : "recibe"
-    FERIA ||--o{ PUESTO : "define"
-    POSTULACION ||--o| PAGO : "genera"
-    POSTULACION ||--o| CREDENCIAL : "obtiene al confirmarse"
-    PUESTO ||--o| POSTULACION : "se asigna a"
-
-    USUARIO {
-        bigint id PK
-        string nombre
-        string email
-        string password_hash
-        string rol "ORGANIZADOR, EMPRENDEDOR"
-        datetime creado_en
+classDiagram
+    class Usuario {
+        +id
+        +nombre
+        +email
+        +contrasena
     }
 
-    FERIA {
-        bigint id PK
-        bigint organizador_id FK
-        string nombre
-        date fecha
-        string provincia
-        string municipio
-        string localidad
-        string calle
-        string categoria_permitida
-        int cupos
-        decimal costo_participacion
-        string estado "BORRADOR, PUBLICADA, FINALIZADA"
-        datetime creado_en
+    class Rol {
+        <<enumeration>>
+        ORGANIZADOR
+        EMPRENDEDOR
     }
 
-    POSTULACION {
-        bigint id PK
-        bigint feria_id FK
-        bigint emprendedor_id FK
-        string rubro
-        string descripcion_emprendimiento
-        string estado "PENDIENTE, APROBADA_PENDIENTE_PAGO, CONFIRMADA, RECHAZADA, VENCIDA"
-        datetime creado_en
+    class Feria {
+        +id
+        +nombre
+        +fecha
+        +categoriaPermitida
+        +cupos
+        +costoParticipacion
+        +estado
     }
 
-    PAGO {
-        bigint id PK
-        bigint postulacion_id FK
-        string mp_order_id
-        string external_reference
-        decimal monto
-        string estado "PENDIENTE, APROBADO, RECHAZADO, CANCELADO, REEMBOLSADO"
-        datetime creado_en
-        datetime actualizado_en
+    class Ubicacion {
+        +provincia
+        +provinciaId
+        +municipio
+        +municipioId
+        +localidad
+        +localidadId
+        +calle
+        +calleId
+        +latitud
+        +longitud
     }
 
-    CREDENCIAL {
-        bigint id PK
-        bigint postulacion_id FK
-        string token_uuid
-        string estado "ACTIVA, UTILIZADA"
-        datetime creado_en
-        datetime utilizada_en
+    class Postulacion {
+        +id
+        +rubro
+        +descripcionEmprendimiento
+        +estado
+        +fechaPostulacion
     }
 
-    PUESTO {
-        bigint id PK
-        bigint feria_id FK
-        bigint postulacion_id FK "nullable hasta que se asigna"
-        string codigo
-        string estado "LIBRE, ASIGNADO"
-        datetime creado_en
+    class Pago {
+        +monto
+        +estado
+        +fecha
+        +referenciaExterna
+        +idOrdenExterno
     }
+
+    class Credencial {
+        +token
+        +estado
+        +fechaGeneracion
+        +fechaUso
+    }
+
+    class Puesto {
+        +codigo
+        +estado
+    }
+
+    Usuario "1" --> "1..*" Rol : posee
+    Usuario "1" --> "0..*" Feria : organiza
+    Usuario "1" --> "0..*" Postulacion : presenta
+    Feria "1" *-- "1" Ubicacion : se realiza en
+    Feria "1" --> "0..*" Postulacion : recibe
+    Postulacion "1" *-- "0..1" Pago : genera
+    Postulacion "1" *-- "0..1" Credencial : obtiene
+    Feria "1" *-- "1..*" Puesto : contiene
+    Puesto "0..1" --> "0..1" Postulacion : asignado a
 ```
 
-## Notas
+## Descripción de relaciones
 
-- `PAGO` y `CREDENCIAL` son 1 a 1 (o 1 a 0) con `POSTULACION`, siguiendo el flujo descripto en el README: una postulación confirmada tiene un pago aprobado y genera exactamente una credencial.
-- `PUESTO` pertenece a una `FERIA` y se vincula opcionalmente a una `POSTULACION` una vez asignado (sección 3, paso 8 del README).
-- Los valores de `estado` reflejan exactamente los definidos en la sección 4.5 del README, para mantener consistencia entre documentación y modelo de datos.
-- Este diagrama está sincronizado con `database/schema.sql` al cierre de la Etapa 3. Las claves únicas (`uq_postulacion_feria_emprendedor`, `uq_puesto_feria_codigo`, `UNIQUE` en `email`, `external_reference`, `token_uuid` y `postulacion_id` de pago/credencial) están modeladas como restricciones en el propio DDL.
-- Decisión de alcance (v1): cada feria admite una sola categoría principal (`categoria_permitida`). El rubro del emprendedor se coteja contra esa categoría. Si en una versión futura se requieren múltiples categorías por feria, se migrará a una tabla `feria_categoria`.
+| Relación | Cardinalidad | Significado |
+|---|---|---|
+| Usuario posee Rol | 1 a 1..* | Un usuario tiene al menos un rol y puede ser organizador y emprendedor simultáneamente. |
+| Usuario organiza Feria | 1 a 0..* | Un organizador puede crear cero o muchas ferias. |
+| Usuario presenta Postulacion | 1 a 0..* | Un emprendedor puede presentar cero o muchas postulaciones. |
+| Feria se realiza en Ubicacion | 1 a 1 | Cada feria tiene exactamente una ubicación. La ubicación no existe independientemente de la feria. |
+| Feria recibe Postulacion | 1 a 0..* | Una feria recibe cero o muchas postulaciones. |
+| Postulacion genera Pago | 1 a 0..1 | Una postulación aprobada genera exactamente un pago. |
+| Postulacion obtiene Credencial | 1 a 0..1 | Una postulación confirmada obtiene exactamente una credencial. |
+| Feria contiene Puesto | 1 a 1..* | Una feria tiene uno o más puestos. |
+| Puesto asignado a Postulacion | 0..1 a 0..1 | Un puesto puede asignarse a una postulación confirmada como máximo. |
+
+## Decisiones de diseño
+
+- **Rol**: se modela como enumeración multivaluada porque un mismo usuario puede ser organizador y emprendedor.
+- **Pago y Credencial**: son entidades débiles de Postulacion. No tienen existencia independiente.
+- **Puesto**: se identifica por su código dentro de una feria (clave natural). No requiere identificador propio.
+- **Ubicacion**: es un value object asociado a Feria. Agrupa los datos devueltos por GeoRef: nombres, IDs del servicio y coordenadas.
