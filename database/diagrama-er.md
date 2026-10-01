@@ -61,9 +61,9 @@ classDiagram
     Usuario "1" --> "0..*" Postulacion : presenta
     Feria "1" *-- "1" Ubicacion : se realiza en
     Feria "1" --> "0..*" Postulacion : recibe
+    Feria "1" *-- "0..*" Puesto : contiene
     Postulacion "1" *-- "0..1" Pago : genera
     Postulacion "1" *-- "0..1" Credencial : obtiene
-    Feria "1" *-- "1..*" Puesto : contiene
     Puesto "0..1" --> "0..1" Postulacion : asignado a
 
     namespace Enumeraciones {
@@ -111,28 +111,31 @@ classDiagram
 
 ## Descripción de relaciones
 
-| Relación | Cardinalidad | Significado |
-|---|---|---|
-| Usuario organiza Feria | 1 a 0..* | Un organizador puede crear cero o muchas ferias. Una feria se identifica por (organizador, nombre, fecha). |
-| Usuario presenta Postulacion | 1 a 0..* | Un emprendedor puede presentar cero o muchas postulaciones, pero una única vez por feria. |
-| Feria se realiza en Ubicacion | 1 a 1 | Cada feria tiene exactamente una ubicación. La ubicación no existe independientemente de la feria. |
-| Feria recibe Postulacion | 1 a 0..* | Una feria recibe cero o muchas postulaciones. |
-| Postulacion genera Pago | 1 a 0..1 | Una postulación en estado `APROBADA_PENDIENTE_PAGO` genera a lo sumo un pago. Si el pago falla, se puede reintentar reutilizando el mismo registro. |
-| Postulacion obtiene Credencial | 1 a 0..1 | Una postulación confirmada obtiene a lo sumo una credencial. |
-| Feria contiene Puesto | 1 a 1..* | Una feria tiene uno o más puestos. |
-| Puesto asignado a Postulacion | 0..1 a 0..1 | Un puesto se asigna como máximo a una postulación confirmada de la misma feria. Si la postulación asociada no está confirmada, el puesto se considera libre. |
+| Relación                       | Cardinalidad | Significado                                                                                                                                                                                |
+| ------------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Usuario organiza Feria         | 1 a 0..\*    | Un usuario con rol ORGANIZADOR puede crear cero o muchas ferias. Cada feria pertenece un único organizador.                                                                                |
+| Usuario presenta Postulacion   | 1 a 0..\*    | Un usuario con rol EMPRENDEDOR puede presentar cero o muchas postulaciones, pero una única vez por feria.                                                                                  |
+| Feria se realiza en Ubicacion  | 1 a 1        | Cada feria tiene exactamente una ubicación. La ubicación no existe independientemente de la feria.                                                                                         |
+| Feria recibe Postulacion       | 1 a 0..\*    | Una feria recibe cero o muchas postulaciones. Cada postulación corresponde a una única feria.                                                                                              |
+| Postulacion genera Pago        | 1 a 0..1     | Una postulación en estado `APROBADA_PENDIENTE_PAGO` genera a lo sumo un pago. Si el pago falla, se puede reintentar reutilizando el mismo registro.                                        |
+| Postulacion obtiene Credencial | 1 a 0..1     | Una postulación confirmada puede tener como máximo una credencial.                                                                                                                         |
+| Feria contiene Puesto          | 1 a 0..\*    | Una feria puede existir sin puestos mientras se encuentra en preparación, pero debe tener al menos un puesto para ser publicada. La cantidad de cupos se deduce de la cantidad de puestos. |
+| Puesto asignado a Postulacion  | 0..1 a 0..1  | Un puesto puede asignarse como máximo a una postulación confirmada y una postulación puede ocupar como máximo un puesto. Ambas deben pertenecer a la misma feria.                          |
 
 ## Estados del dominio
 
-| Enumeración | Valores |
-|---|---|
-| `EstadoFeria` | `BORRADOR`, `PUBLICADA`, `EN_CURSO`, `FINALIZADA`, `CANCELADA` |
+| Enumeración         | Valores                                                                      |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `Rol`               | `ORGANIZADOR`, `EMPRENDEDOR`                                                 |
+| `EstadoFeria`       | `BORRADOR`, `PUBLICADA`, `EN_CURSO`, `FINALIZADA`, `CANCELADA`               |
 | `EstadoPostulacion` | `PENDIENTE`, `APROBADA_PENDIENTE_PAGO`, `CONFIRMADA`, `RECHAZADA`, `VENCIDA` |
-| `EstadoPago` | `PENDIENTE`, `APROBADO`, `RECHAZADO`, `CANCELADO`, `REEMBOLSADO` |
-| `EstadoCredencial` | `ACTIVA`, `UTILIZADA`, `EXPIRADA` |
+| `EstadoPago`        | `PENDIENTE`, `APROBADO`, `RECHAZADO`, `CANCELADO`, `REEMBOLSADO`             |
+| `EstadoCredencial`  | `ACTIVA`, `UTILIZADA`, `EXPIRADA`                                            |
 
 ## Reglas de negocio
 
+- Solo un usuario con rol `ORGANIZADOR` puede crear una feria.
+- Solo un usuario con rol `EMPRENDEDOR` puede presentar una postulación.
 - Un emprendedor se postula una sola vez por feria.
 - Solo una postulación `CONFIRMADA` ocupa un puesto, y debe ser de la misma feria.
 - Solo una postulación en estado `APROBADA_PENDIENTE_PAGO` puede generar un pago.
