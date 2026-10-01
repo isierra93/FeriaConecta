@@ -9,6 +9,7 @@ classDiagram
         +nombre
         +email
         +contrasena
+        +roles: Rol[1..*]
     }
 
     class Rol {
@@ -68,7 +69,6 @@ classDiagram
         +estado
     }
 
-    Usuario "1" --> "1..*" Rol : posee
     Usuario "1" --> "0..*" Feria : organiza
     Usuario "1" --> "0..*" Postulacion : presenta
     Feria "1" *-- "1" Ubicacion : se realiza en
@@ -83,7 +83,6 @@ classDiagram
 
 | Relación | Cardinalidad | Significado |
 |---|---|---|
-| Usuario posee Rol | 1 a 1..* | Un usuario tiene al menos un rol y puede ser organizador y emprendedor simultáneamente. |
 | Usuario organiza Feria | 1 a 0..* | Un organizador puede crear cero o muchas ferias. |
 | Usuario presenta Postulacion | 1 a 0..* | Un emprendedor puede presentar cero o muchas postulaciones. |
 | Feria se realiza en Ubicacion | 1 a 1 | Cada feria tiene exactamente una ubicación. La ubicación no existe independientemente de la feria. |
