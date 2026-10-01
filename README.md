@@ -26,12 +26,12 @@ La organización de ferias suele realizarse mediante formularios, planillas, men
 
 FeriaConecta busca digitalizar y ordenar el proceso completo, desde la publicación de una feria hasta la acreditación del emprendedor el día del evento. También ofrecerá una vista pública para que cualquier persona pueda consultar las próximas ferias y los emprendimientos participantes.
 
-**Usuarios:** organizador o administrador, emprendedor y público general.
+**Actores:** usuarios registrados con rol ORGANIZADOR o EMPRENDEDOR, y público general que puede consultar la información publicada sin necesidad de registrarse.
 
 ## 2. Alcance de la primera versión
 
 1. Registro e inicio de sesión con roles y permisos.
-2. Perfiles de emprendedores con datos de contacto, descripción y rubro.
+2. Datos básicos de usuario y postulación de emprendedores, incluyendo rubro y descripción del emprendimiento.
 3. Gestión de ferias: fechas, ubicación, costo de participación, cupos, categorías y estado.
    > **Decisión de alcance (v1):** cada feria admite una sola categoría principal (`categoria_permitida`).
    > El rubro declarado por el emprendedor en la postulación se coteja contra esa categoría por coincidencia.
@@ -65,18 +65,22 @@ Se desarrollará como una aplicación web responsive. El frontend consumirá una
 Para mantener el proyecto ordenado se utilizará un **monolito modular** y un único repositorio de GitHub, separado en carpetas de frontend, backend y documentación. El sistema se publicará en servicios en la nube para que pueda probarse en línea durante las entregas.
 
 ### 4.1 Arquitectura de despliegue
- 
+
 El sistema se despliega en dos entornos distintos según el componente, aprovechando infraestructura propia para el backend/datos y una plataforma especializada para el frontend:
- 
-| Componente | Dónde se despliega | Detalle |
-|---|---|---|
+
+| Componente                | Dónde se despliega        | Detalle                                                                                                                                                                                               |
+| ------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Backend (Spring Boot)** | VPS propio (Oracle Cloud) | Contenedor Docker gestionado desde **Portainer**, corriendo sobre Docker Engine. Expone su puerto interno (8080) únicamente dentro de la red Docker del stack — no se expone directamente a internet. |
-| **Base de datos (MySQL)** | Mismo VPS (Oracle Cloud) | Contenedor MySQL ya operativo, con volumen persistente para los datos. Accesible solo por red interna Docker desde el contenedor del backend (nombre de servicio, no IP pública). |
-| **Frontend (React)** | Vercel | Build estático (Vite) desplegado con CI/CD automático desde GitHub (cada push a `main` dispara un nuevo deploy). Consume la API pública vía HTTPS. |
+| **Base de datos (MySQL)** | Mismo VPS (Oracle Cloud)  | Contenedor MySQL ya operativo, con volumen persistente para los datos. Accesible solo por red interna Docker desde el contenedor del backend (nombre de servicio, no IP pública).                     |
+| **Frontend (React)**      | Vercel                    | Build estático (Vite) desplegado con CI/CD automático desde GitHub (cada push a `main` dispara un nuevo deploy). Consume la API pública vía HTTPS.                                                    |
 
 ### 4.2. Integración con la API GeoRef
 
-Se utilizará **GeoRef**, el Servicio de Normalización de Datos Geográficos de Argentina, como API REST externa. Su función será asistir el autocompletado y validar o normalizar **la dirección de la feria** —provincia, municipio, localidad y calle— al momento de crearla.
+Se utilizará **GeoRef**, el Servicio de Normalización de Datos Geográficos de Argentina, como API REST externa. Su función será asistir el autocompletado y validar o normalizar la ubicación de la feria al momento de crearla.
+
+A partir de la información procesada mediante **GeoRef**, el sistema almacenará en la ubicación de la feria los valores normalizados de provincia, municipio, localidad, calle y altura, junto con sus coordenadas de latitud y longitud.
+
+No se almacenarán identificadores internos del servicio **GeoRef** que no sean necesarios para el funcionamiento de FeriaConecta.
 
 > Aclaración de alcance: GeoRef trabaja sobre divisiones geográficas y direcciones reales (provincia → localidad → calle), por lo que solo aplica a dónde se realiza la feria en su conjunto. Los puestos (stand 1, stand 2, etc.) no tienen una ubicación geográfica propia: son posiciones dentro del layout interno del evento, identificadas por número/código, sin relación con GeoRef. La distribución visual de puestos dentro de una feria queda fuera del alcance de la v1 (ver sección 8, "plano visual de los puestos" como mejora futura).
 
@@ -101,6 +105,8 @@ El flujo técnico será el siguiente:
 7. La participación se confirma únicamente cuando la orden verificada posee el estado `processed`.
 
 Este proceso evita considerar como válido un pago basándose solamente en la URL de retorno del navegador.
+
+Decisión de alcance (v1): cada postulación mantiene como máximo un registro de Pago. Si una operación falla o debe reintentarse, se reutiliza ese mismo registro actualizando su estado y los datos correspondientes a la operación más reciente. En esta versión no se conserva un historial independiente de cada intento de pago.
 
 - **Documentación:** [Checkout Pro mediante Orders API](https://www.mercadopago.com.ar/developers/es/docs/checkout-pro-orders/create-order)
 - **Notificaciones:** [Webhooks para Checkout Pro](https://www.mercadopago.com.ar/developers/es/docs/checkout-pro-orders/payment-notifications)
@@ -127,24 +133,24 @@ Después de la confirmación, la credencial cambiará a `UTILIZADA`. Si se vuelv
 
 ### 4.5. Estados principales del flujo
 
-| Recurso | Estados contemplados |
-|---|---|
-| **Postulación** | `PENDIENTE` → `APROBADA_PENDIENTE_PAGO` → `CONFIRMADA`; también puede finalizar como `RECHAZADA` o `VENCIDA` |
-| **Pago** | `PENDIENTE`, `APROBADO`, `RECHAZADO`, `CANCELADO` o `REEMBOLSADO` |
-| **Feria** | `BORRADOR` → `PUBLICADA` → `FINALIZADA` |
-| **Puesto** | `LIBRE` → `ASIGNADO` |
-| **Credencial QR** | `ACTIVA` → `UTILIZADA` |
+| Recurso           | Estados contemplados                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Postulación**   | `PENDIENTE` → `APROBADA_PENDIENTE_PAGO` → `CONFIRMADA`; también puede finalizar como `RECHAZADA` o `VENCIDA` |
+| **Pago**          | `PENDIENTE`, `APROBADO`, `RECHAZADO`, `CANCELADO` o `REEMBOLSADO`                                            |
+| **Feria**         | `BORRADOR` → `PUBLICADA` → `EN CURSO`, `FINALIZADA``CANCELADA`                                               |
+| **Puesto**        | `LIBRE` → `ASIGNADO`                                                                                         |
+| **Credencial QR** | `ACTIVA`, `UTILIZADA` o `EXPIRADA`                                                                           |
 
 ## 5. Stack tecnológico
- 
-| Componente | Tecnología propuesta |
-|---|---|
-| **Frontend** | React, Vite, TypeScript, HTML y CSS |
-| **Backend** | Java 21, Spring Boot y API REST |
-| **Base de datos** | MySQL con Spring Data JPA / Hibernate |
-| **Seguridad** | Spring Security y JWT |
-| **Pruebas y documentación** | JUnit, Mockito, Postman y Swagger / OpenAPI |
-| **Despliegue** | Backend y base de datos: VPS Oracle (Docker + Portainer + Nginx Proxy Manager). Frontend: Vercel (CI/CD desde GitHub) 
+
+| Componente                  | Tecnología propuesta                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**                | React, Vite, TypeScript, HTML y CSS                                                                                   |
+| **Backend**                 | Java 21, Spring Boot y API REST                                                                                       |
+| **Base de datos**           | MySQL con Spring Data JPA / Hibernate                                                                                 |
+| **Seguridad**               | Spring Security y JWT                                                                                                 |
+| **Pruebas y documentación** | JUnit, Mockito, Postman y Swagger / OpenAPI                                                                           |
+| **Despliegue**              | Backend y base de datos: VPS Oracle (Docker + Portainer + Nginx Proxy Manager). Frontend: Vercel (CI/CD desde GitHub) |
 
 ## 6. Estructura del repositorio
 
@@ -157,7 +163,7 @@ README.md
 ```
 
 ## 7. Seguimiento del proyecto
- 
+
 El desarrollo se organiza en sprints mediante [GitHub Projects](https://github.com/users/isierra93/projects/2/views/1), con Issues vinculados a cada funcionalidad del alcance (sección 2) y Milestones por etapa. El historial completo de commits y decisiones técnicas queda documentado en este repositorio.
 
 ## 8. Límites y posibles mejoras
