@@ -5,9 +5,8 @@ Modelo conceptual del dominio de FeriaConecta, independiente de cualquier tecnol
 ```mermaid
 classDiagram
     class Usuario {
-        +id
-        +nombre
         +email
+        +nombre
         +contrasena
         +roles: Rol[1..*]
     }
@@ -15,30 +14,24 @@ classDiagram
     note for Usuario "Un usuario puede ser ORGANIZADOR, EMPRENDEDOR o ambos. <br> Solo los organizadores crean ferias y solo los emprendedores presentan postulaciones."
 
     class Feria {
-        +id
         +nombre
         +fecha
         +categoriaPermitida
-        +cupos
         +costoParticipacion
         +estado: EstadoFeria
     }
 
     class Ubicacion {
         +provincia
-        +provinciaId
         +municipio
-        +municipioId
         +localidad
-        +localidadId
         +calle
-        +calleId
+        +altura
         +latitud
         +longitud
     }
 
     class Postulacion {
-        +id
         +rubro
         +descripcionEmprendimiento
         +estado: EstadoPostulacion
@@ -62,7 +55,6 @@ classDiagram
 
     class Puesto {
         +codigo
-        +estado: EstadoPuesto
     }
 
     Usuario "1" --> "0..*" Feria : organiza
@@ -114,12 +106,6 @@ classDiagram
             UTILIZADA
             EXPIRADA
         }
-
-        class EstadoPuesto {
-            <<enumeration>>
-            LIBRE
-            ASIGNADO
-        }
     }
 ```
 
@@ -127,14 +113,14 @@ classDiagram
 
 | Relación | Cardinalidad | Significado |
 |---|---|---|
-| Usuario organiza Feria | 1 a 0..* | Un organizador puede crear cero o muchas ferias. |
-| Usuario presenta Postulacion | 1 a 0..* | Un emprendedor puede presentar cero o muchas postulaciones. |
+| Usuario organiza Feria | 1 a 0..* | Un organizador puede crear cero o muchas ferias. Una feria se identifica por (organizador, nombre, fecha). |
+| Usuario presenta Postulacion | 1 a 0..* | Un emprendedor puede presentar cero o muchas postulaciones, pero una única vez por feria. |
 | Feria se realiza en Ubicacion | 1 a 1 | Cada feria tiene exactamente una ubicación. La ubicación no existe independientemente de la feria. |
 | Feria recibe Postulacion | 1 a 0..* | Una feria recibe cero o muchas postulaciones. |
-| Postulacion genera Pago | 1 a 0..1 | Una postulación aprobada genera exactamente un pago. |
-| Postulacion obtiene Credencial | 1 a 0..1 | Una postulación confirmada obtiene exactamente una credencial. |
+| Postulacion genera Pago | 1 a 0..1 | Una postulación en estado `APROBADA_PENDIENTE_PAGO` genera a lo sumo un pago. Si el pago falla, se puede reintentar reutilizando el mismo registro. |
+| Postulacion obtiene Credencial | 1 a 0..1 | Una postulación confirmada obtiene a lo sumo una credencial. |
 | Feria contiene Puesto | 1 a 1..* | Una feria tiene uno o más puestos. |
-| Puesto asignado a Postulacion | 0..1 a 0..1 | Un puesto puede asignarse a una postulación confirmada como máximo. |
+| Puesto asignado a Postulacion | 0..1 a 0..1 | Un puesto se asigna como máximo a una postulación confirmada de la misma feria. Si la postulación asociada no está confirmada, el puesto se considera libre. |
 
 ## Estados del dominio
 
@@ -144,19 +130,23 @@ classDiagram
 | `EstadoPostulacion` | `PENDIENTE`, `APROBADA_PENDIENTE_PAGO`, `CONFIRMADA`, `RECHAZADA`, `VENCIDA` |
 | `EstadoPago` | `PENDIENTE`, `APROBADO`, `RECHAZADO`, `CANCELADO`, `REEMBOLSADO` |
 | `EstadoCredencial` | `ACTIVA`, `UTILIZADA`, `EXPIRADA` |
-| `EstadoPuesto` | `LIBRE`, `ASIGNADO` |
+
+## Reglas de negocio
+
+- Un emprendedor se postula una sola vez por feria.
+- Solo una postulación `CONFIRMADA` ocupa un puesto, y debe ser de la misma feria.
+- Solo una postulación en estado `APROBADA_PENDIENTE_PAGO` puede generar un pago.
+- Si un pago falla, se reutiliza el mismo registro en reintentos.
+- Una feria tiene al menos un puesto; la cantidad de cupos se deduce de la cantidad de puestos.
 
 ## Decisiones de diseño
 
+- **Identificación**: no se modelan identificadores técnicos en el diagrama conceptual. `Usuario` se identifica por `email`; `Feria` por `(organizador, nombre, fecha)`; `Postulacion` por `(Usuario, Feria)`; `Puesto` por `(Feria, codigo)`. `Pago`, `Credencial` y `Ubicacion` son entidades débiles identificadas por `Postulacion` o `Feria`. Las claves sustitutas y los tipos de datos (como `bigint`) se definen en el diseño lógico/físico.
 - **Rol**: se modela como enumeración multivaluada porque un mismo usuario puede ser organizador y emprendedor.
 - **Estados**: se modelan como enumeraciones del dominio, tipando el atributo `estado` de cada entidad.
-- **Pago y Credencial**: son entidades débiles de Postulacion. No tienen existencia independiente.
-- **Puesto**: se identifica por su código dentro de una feria (clave natural). No requiere identificador propio.
-- **Ubicacion**: es un value object asociado a Feria. Agrupa los datos devueltos por GeoRef: nombres, IDs del servicio y coordenadas.
-
-## Deuda documental pendiente
-
-Los estados `EstadoFeria` y `EstadoCredencial` incorporan valores nuevos (`EN_CURSO`, `CANCELADA`, `EXPIRADA`) que aún deben reflejarse en:
-
-- `README.md` sección 4.5.
-- `database/schema.sql` (restricciones `CHECK`).
+- **Postulación única**: un emprendedor se postula una única vez a cada feria. `RECHAZADA` y `VENCIDA` son estados finales y no habilitan una nueva postulación.
+- **Pago**: es entidad débil de `Postulacion` y se reutiliza en reintentos; no se crean múltiples pagos por postulación en la v1. `referenciaExterna` es el identificador de la postulación que se envía al proveedor de pagos; `idOrdenExterno` es el identificador de la orden que genera el proveedor. `monto` refleja lo efectivamente cobrado, que puede diferir del `costoParticipacion` actual de la feria.
+- **Credencial**: es entidad débil de `Postulacion`; no tiene existencia independiente.
+- **Puesto**: no tiene atributo de estado. Se considera asignado solo cuando está vinculado a una `Postulacion` en estado `CONFIRMADA` y de la misma `Feria`; en cualquier otro caso se considera libre.
+- **Cupos**: la cantidad de cupos de una feria se deduce de la cantidad de puestos asociados; no se modela como atributo independiente.
+- **Ubicacion**: es una entidad débil de `Feria` (relación de composición). El servicio de normalización geográfica (GeoRef) se usa para validar y corregir al cargar; se persisten los nombres normalizados, la altura y las coordenadas, sin los identificadores internos del servicio.
