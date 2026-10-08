@@ -137,8 +137,8 @@ Después de la confirmación, la credencial cambiará a `UTILIZADA`. Si se vuelv
 | ----------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Postulación**   | `PENDIENTE` → `APROBADA_PENDIENTE_PAGO` → `CONFIRMADA`; también puede finalizar como `RECHAZADA` o `VENCIDA` |
 | **Pago**          | `PENDIENTE`, `APROBADO`, `RECHAZADO`, `CANCELADO` o `REEMBOLSADO`                                            |
-| **Feria**         | `BORRADOR` → `PUBLICADA` → `EN CURSO`, `FINALIZADA``CANCELADA`                                               |
-| **Puesto**        | `LIBRE` → `ASIGNADO`                                                                                         |
+| **Feria**         | `BORRADOR`, `PUBLICADA`, `EN_CURSO`, `FINALIZADA`, `CANCELADA`                                               |
+| **Puesto**        | No tiene estado; `LIBRE`/`ASIGNADO` se deduce de la relación con una postulación confirmada                  |
 | **Credencial QR** | `ACTIVA`, `UTILIZADA` o `EXPIRADA`                                                                           |
 
 ## 5. Stack tecnológico
