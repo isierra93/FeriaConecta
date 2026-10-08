@@ -1,0 +1,76 @@
+name: "⚙️ Tarea técnica"
+description: "Setup, infraestructura o configuración sin comportamiento visible para el usuario"
+title: "[TASK] "
+labels: ["task"]
+body:
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Descripción
+      description: "¿Qué hay que hacer y por qué es necesario?"
+      placeholder: "Explicá brevemente la tarea y su motivación."
+    validations:
+      required: true
+
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo / Resultado esperado
+      placeholder: "¿Cuál es el resultado concreto que se espera lograr?"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: Módulo / Área
+      description: Seleccioná el módulo o área afectada.
+      options:
+        - Autenticación y registro
+        - Gestión de ferias
+        - Postulaciones
+        - Pagos
+        - Puestos y asignación
+        - Credenciales QR
+        - Acreditación QR
+        - Panel y reportes
+        - Listado público
+        - Documentación / General
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: "¿Cuándo se considera lista esta tarea?"
+      value: "- [ ] \n- [ ] \n- [ ] "
+
+  - type: textarea
+    id: tareas
+    attributes:
+      label: Tareas
+      description: "Listá las subtareas como checklist."
+      value: "- [ ] \n- [ ] \n- [ ] "
+
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependencias / Bloqueado por
+      placeholder: "Enlaces a otros issues o tareas de las que depende esta tarea."
+
+  - type: textarea
+    id: notas
+    attributes:
+      label: Notas / Riesgos
+      placeholder: "Cualquier consideración o riesgo relevante."
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Marcá los items cuando estén listos.
+      options:
+        - label: Implementación completa
+        - label: Tests pasan
+        - label: Code review realizado

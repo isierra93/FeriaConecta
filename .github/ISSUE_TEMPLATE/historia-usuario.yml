@@ -1,0 +1,83 @@
+name: "🧩 Historia de usuario"
+description: "Funcionalidad que usa directamente un usuario (organizador o emprendedor)"
+title: "[FEATURE] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Historia de usuario
+        Completá la siguiente estructura.
+
+  - type: textarea
+    id: historia
+    attributes:
+      label: Historia de usuario
+      description: "Como [rol], quiero [acción], para [beneficio]."
+      value: "Como \nquiero \npara "
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: Módulo / Área
+      description: Seleccioná el módulo o área afectada.
+      options:
+        - Autenticación y registro
+        - Gestión de ferias
+        - Postulaciones
+        - Pagos
+        - Puestos y asignación
+        - Credenciales QR
+        - Acreditación QR
+        - Panel y reportes
+        - Listado público
+        - Documentación / General
+    validations:
+      required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto / Notas adicionales
+      placeholder: "Información extra que ayude a entender la historia."
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: "Usá el formato Dado/Cuando/Entonces."
+      value: |
+        **Dado** que ...
+        **Cuando** ...
+        **Entonces** ...
+
+        **Dado** que ...
+        **Cuando** ...
+        **Entonces** ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: tareas
+    attributes:
+      label: Tareas técnicas
+      description: "Listá las tareas como checklist."
+      value: "- [ ] \n- [ ] \n- [ ] "
+
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependencias / Bloqueado por
+      placeholder: "Enlaces a otros issues o tareas de las que depende esta historia."
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Marcá los items cuando estén listos.
+      options:
+        - label: Implementación completa
+        - label: Tests pasan
+        - label: Code review realizado

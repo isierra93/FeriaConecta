@@ -1,0 +1,89 @@
+name: "🐛 Bug"
+description: "Reporte de un error o comportamiento inesperado"
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Descripción del problema
+      placeholder: "Resumen claro y conciso del error."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: Módulo / Área
+      description: Seleccioná el módulo o área afectada.
+      options:
+        - Autenticación y registro
+        - Gestión de ferias
+        - Postulaciones
+        - Pagos
+        - Puestos y asignación
+        - Credenciales QR
+        - Acreditación QR
+        - Panel y reportes
+        - Listado público
+        - Documentación / General
+    validations:
+      required: true
+
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducir
+      description: "Enumerá los pasos de forma clara."
+      value: "1. \n2. \n3. "
+    validations:
+      required: true
+
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Comportamiento esperado
+      placeholder: "¿Qué debería suceder?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportamiento actual
+      placeholder: "¿Qué sucede realmente?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidencia
+    attributes:
+      label: Evidencia
+      description: "Screenshots, logs, URLs, etc."
+      placeholder: "Adjuntá o pegá aquí la evidencia del error."
+
+  - type: textarea
+    id: entorno
+    attributes:
+      label: Entorno
+      description: "Navegador, sistema operativo, versión del sistema, etc."
+      value: |
+        - Navegador: 
+        - Sistema operativo: 
+        - Rama/commit: 
+
+  - type: textarea
+    id: relacionado
+    attributes:
+      label: Relacionado con
+      placeholder: "Enlaces a issues, PRs o historias relacionadas."
+
+  - type: checkboxes
+    id: cierre
+    attributes:
+      label: Criterios de cierre
+      description: Marcá los items cuando estén listos.
+      options:
+        - label: Error corregido
+        - label: Fix verificado localmente
+        - label: Code review realizado
