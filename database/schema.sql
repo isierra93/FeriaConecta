@@ -1,42 +1,59 @@
--- Script DDL inicial de FeriaConecta (borrador)
--- Basado en diagrama-er.md. Ajustar tipos, índices y restricciones antes de usar en producción.
+-- Script DDL inicial de FeriaConecta
+-- Basado en database/diagrama-er.md y docs/07-diagrama-de-clases.md
 
 CREATE TABLE usuario (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    rol VARCHAR(20) NOT NULL, -- ORGANIZADOR, EMPRENDEDOR
+    nombre VARCHAR(150) NOT NULL,
+    contrasena_hash VARCHAR(255) NOT NULL,
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE usuario_rol (
+    usuario_id INT NOT NULL,
+    rol VARCHAR(20) NOT NULL,
+    PRIMARY KEY (usuario_id, rol),
+    CONSTRAINT fk_usuario_rol_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id),
     CONSTRAINT chk_usuario_rol CHECK (rol IN ('ORGANIZADOR','EMPRENDEDOR'))
 );
 
 CREATE TABLE feria (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    organizador_id BIGINT NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    organizador_id INT NOT NULL,
     nombre VARCHAR(200) NOT NULL,
     fecha DATE NOT NULL,
-    provincia VARCHAR(100),
-    municipio VARCHAR(100),
-    localidad VARCHAR(100),
-    calle VARCHAR(200),
-    categoria_permitida VARCHAR(100),
-    cupos INT NOT NULL,
+    categoria_permitida VARCHAR(100) NOT NULL,
     costo_participacion DECIMAL(10,2) NOT NULL,
-    estado VARCHAR(20) NOT NULL DEFAULT 'BORRADOR', -- BORRADOR, PUBLICADA, FINALIZADA
+    estado VARCHAR(20) NOT NULL DEFAULT 'BORRADOR',
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_feria_organizador FOREIGN KEY (organizador_id) REFERENCES usuario(id),
-    CONSTRAINT chk_feria_estado CHECK (estado IN ('BORRADOR','PUBLICADA','FINALIZADA'))
+    CONSTRAINT chk_feria_estado CHECK (estado IN ('BORRADOR','PUBLICADA','EN_CURSO','FINALIZADA','CANCELADA'))
+);
+
+CREATE TABLE ubicacion (
+    feria_id INT PRIMARY KEY,
+    provincia VARCHAR(100) NOT NULL,
+    municipio VARCHAR(100) NOT NULL,
+    localidad VARCHAR(100) NOT NULL,
+    calle VARCHAR(200) NOT NULL,
+    altura VARCHAR(20) NOT NULL,
+    latitud DECIMAL(10,8),
+    longitud DECIMAL(11,8),
+    CONSTRAINT fk_ubicacion_feria FOREIGN KEY (feria_id) REFERENCES feria(id)
 );
 
 CREATE TABLE postulacion (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    feria_id BIGINT NOT NULL,
-    emprendedor_id BIGINT NOT NULL,
-    rubro VARCHAR(100),
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    feria_id INT NOT NULL,
+    emprendedor_id INT NOT NULL,
+    rubro VARCHAR(100) NOT NULL,
     descripcion_emprendimiento TEXT,
-    estado VARCHAR(30) NOT NULL DEFAULT 'PENDIENTE', -- PENDIENTE, APROBADA_PENDIENTE_PAGO, CONFIRMADA, RECHAZADA, VENCIDA
+    estado VARCHAR(30) NOT NULL DEFAULT 'PENDIENTE',
+    fecha_postulacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_postulacion_feria FOREIGN KEY (feria_id) REFERENCES feria(id),
     CONSTRAINT fk_postulacion_emprendedor FOREIGN KEY (emprendedor_id) REFERENCES usuario(id),
     CONSTRAINT uq_postulacion_feria_emprendedor UNIQUE (feria_id, emprendedor_id),
@@ -44,12 +61,12 @@ CREATE TABLE postulacion (
 );
 
 CREATE TABLE pago (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    postulacion_id BIGINT NOT NULL UNIQUE,
-    mp_order_id VARCHAR(100),
-    external_reference VARCHAR(100) NOT NULL UNIQUE,
+    postulacion_id INT PRIMARY KEY,
     monto DECIMAL(10,2) NOT NULL,
-    estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE', -- PENDIENTE, APROBADO, RECHAZADO, CANCELADO, REEMBOLSADO
+    estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
+    fecha DATETIME,
+    referencia_externa VARCHAR(100) NOT NULL UNIQUE,
+    id_orden_externo VARCHAR(100),
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
     actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_pago_postulacion FOREIGN KEY (postulacion_id) REFERENCES postulacion(id),
@@ -57,25 +74,24 @@ CREATE TABLE pago (
 );
 
 CREATE TABLE credencial (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    postulacion_id BIGINT NOT NULL UNIQUE,
-    token_uuid VARCHAR(36) NOT NULL UNIQUE,
-    estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVA', -- ACTIVA, UTILIZADA
+    postulacion_id INT PRIMARY KEY,
+    token VARCHAR(36) NOT NULL UNIQUE,
+    estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVA',
+    fecha_generacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_uso DATETIME,
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
-    utilizada_en DATETIME NULL,
+    actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_credencial_postulacion FOREIGN KEY (postulacion_id) REFERENCES postulacion(id),
-    CONSTRAINT chk_credencial_estado CHECK (estado IN ('ACTIVA','UTILIZADA'))
+    CONSTRAINT chk_credencial_estado CHECK (estado IN ('ACTIVA','UTILIZADA','EXPIRADA'))
 );
 
 CREATE TABLE puesto (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    feria_id BIGINT NOT NULL,
-    postulacion_id BIGINT NULL,
+    feria_id INT NOT NULL,
     codigo VARCHAR(20) NOT NULL,
-    estado VARCHAR(20) NOT NULL DEFAULT 'LIBRE', -- LIBRE, ASIGNADO
+    postulacion_id INT UNIQUE,
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (feria_id, codigo),
     CONSTRAINT fk_puesto_feria FOREIGN KEY (feria_id) REFERENCES feria(id),
-    CONSTRAINT fk_puesto_postulacion FOREIGN KEY (postulacion_id) REFERENCES postulacion(id),
-    CONSTRAINT uq_puesto_feria_codigo UNIQUE (feria_id, codigo),
-    CONSTRAINT chk_puesto_estado CHECK (estado IN ('LIBRE','ASIGNADO'))
+    CONSTRAINT fk_puesto_postulacion FOREIGN KEY (postulacion_id) REFERENCES postulacion(id)
 );
