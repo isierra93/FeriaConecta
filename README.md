@@ -166,19 +166,16 @@ README.md
 
 El desarrollo se organiza en sprints mediante [GitHub Projects](https://github.com/users/isierra93/projects/2/views/1), con Issues vinculados a cada funcionalidad del alcance (sección 2) y Milestones por etapa. El historial completo de commits y decisiones técnicas queda documentado en este repositorio.
 
-## 8. Límites y posibles mejoras
+## 8. Límites y mejoras futuras
 
 La primera versión **no** incluirá:
 
 - Mensajería interna o chat entre usuarios.
 - Mapas interactivos.
 - Plano visual para distribuir los puestos.
-
-**Mejoras posteriores:**
-
 - Notificaciones automáticas por correo.
-- Mapa interactivo con la ubicación de las ferias.
-- Plano visual para organizar la distribución interna de los puestos.
+
+Estas funcionalidades podrían considerarse en versiones futuras del sistema.
 
 ---
 
