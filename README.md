@@ -34,7 +34,7 @@ FeriaConecta busca digitalizar y ordenar el proceso completo, desde la publicaci
 2. Datos básicos de usuario y postulación de emprendedores, incluyendo rubro y descripción del emprendimiento.
 3. Gestión de ferias: fecha, ubicación, costo de participación, cantidad de puestos, categoría permitida y estado.
    > **Decisión de alcance (v1):** cada feria admite una sola categoría principal (`categoria_permitida`).
-   > El rubro declarado por el emprendedor en la postulación se coteja contra esa categoría por coincidencia.
+   > El rubro declarado por el emprendedor en la postulación se coteja contra esa categoría por coincidencia exacta. Las categorías provienen de un catálogo cerrado definido en el código (enum).
    > Si en una versión posterior se requieren múltiples categorías por feria, se migrará a una tabla `feria_categoria`.
 4. Postulación de emprendedores y evaluación por parte del organizador.
 5. Pago de la participación mediante Mercado Pago para las postulaciones aprobadas.
@@ -42,7 +42,7 @@ FeriaConecta busca digitalizar y ordenar el proceso completo, desde la publicaci
 7. Generación de una credencial QR para cada participante confirmado.
 8. Escaneo y validación del QR para registrar la asistencia sin duplicaciones.
 9. Creación de puestos y asignación de cada espacio a un participante confirmado.
-10. Listado público de ferias y estadísticas básicas para el organizador.
+10. Listado público de ferias (solo en estado `PUBLICADA` o `EN_CURSO`) y estadísticas básicas para el organizador.
 11. Validación, normalización y asistencia para el autocompletado de la dirección de la feria mediante la API GeoRef.
 
 ## 3. Flujo principal de funcionamiento
@@ -60,9 +60,9 @@ FeriaConecta busca digitalizar y ordenar el proceso completo, desde la publicaci
 
 ## 4. Implementación propuesta
 
-Se desarrollará como una aplicación web responsive. El frontend consumirá una API REST creada con Spring Boot y la información se almacenará en MySQL. La seguridad se manejará mediante autenticación con JWT y permisos según el rol del usuario.
+Se desarrollará como una aplicación web responsive. El frontend consumirá una API REST creada con Spring Boot y la información se almacenará en MySQL. La seguridad se manejará mediante autenticación con JWT y permisos según el rol del usuario y la propiedad del recurso (cada organizador gestiona solo sus ferias; cada emprendedor, solo sus postulaciones y credenciales).
 
-Para mantener el proyecto ordenado se utilizará un **monolito modular** y un único repositorio de GitHub, separado en carpetas de frontend, backend y documentación. El sistema se publicará en servicios en la nube para que pueda probarse en línea durante las entregas.
+Para mantener el proyecto ordenado se utilizará un **monolito modular** y un único repositorio de GitHub, separado en carpetas de frontend, backend y documentación. El backend se organiza en paquetes por módulo funcional (`auth`, `feria`, `puesto`, `postulacion`, `pago`, `credencial`, `acreditacion`, `panel`, `publico`, más `common`/`config`), que se comunican entre sí por servicios. El esquema de la base de datos vive en `database/schema.sql` como fuente de verdad e Hibernate valida el mapeo con `ddl-auto=validate` (no genera tablas). El sistema se publicará en servicios en la nube para que pueda probarse en línea durante las entregas.
 
 ### 4.1 Arquitectura de despliegue
 
@@ -140,6 +140,10 @@ Después de la confirmación, la credencial cambiará a `UTILIZADA`. Si se vuelv
 | **Feria**         | `BORRADOR`, `PUBLICADA`, `EN_CURSO`, `FINALIZADA`, `CANCELADA`                                               |
 | **Puesto**        | No tiene estado; `LIBRE`/`ASIGNADO` se deduce de la relación con una postulación confirmada                  |
 | **Credencial QR** | `ACTIVA`, `UTILIZADA` o `EXPIRADA`                                                                           |
+
+> **Transiciones de feria (manuales, a cargo del organizador):** `BORRADOR → PUBLICADA → EN_CURSO → FINALIZADA`; `CANCELADA` desde cualquier estado no final. Publicar requiere al menos un puesto.
+> **Cupos:** el total de cupos de una feria es su cantidad de puestos; los cupos ocupados son las postulaciones `APROBADA_PENDIENTE_PAGO` + `CONFIRMADA`. No se aprueba una postulación sin cupo libre.
+> **Vencimiento de pago:** una postulación `APROBADA_PENDIENTE_PAGO` pasa a `VENCIDA` si no se abona dentro de `PAGO_PLAZO_HORAS` (72 hs por defecto) contadas desde su aprobación; un proceso programado también lleva las credenciales de ferias finalizadas a `EXPIRADA`.
 
 ## 5. Stack tecnológico
 
