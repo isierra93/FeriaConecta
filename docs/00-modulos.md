@@ -5,6 +5,7 @@
 - Diagrama Entidad-Relación: [`database/diagrama-er.md`](../database/diagrama-er.md)
 - Script DDL: [`database/schema.sql`](../database/schema.sql)
 - Stack: MySQL 8, ejecutado en contenedor sobre el VPS Oracle (ver [README sección 4.1](../README.md)).
+- Gestión del esquema: `schema.sql` es la fuente de verdad; Hibernate usa `ddl-auto=validate` (no genera ni altera tablas).
 
 Entidades: **USUARIO · FERIA · UBICACION · POSTULACION · PAGO · CREDENCIAL · PUESTO**.
 
@@ -53,6 +54,8 @@ involucradas en el modelo conceptual.
 
 - **Categorías por feria (v1):** una sola categoría principal por feria
   (`feria.categoria_permitida`). Documentado en [README sección 2.3](../README.md).
+  Las categorías provienen de un catálogo cerrado (enum) en el código y el cotejo
+  `rubro`↔`categoria_permitida` es por coincidencia exacta.
 - **Credencial QR:** el SVG contiene sólo el token UUID + URL;
   ningún dato personal. ([README sección 4.4](../README.md))
 - **Pagos:** fuente de verdad = `GET /v1/orders/{id}` validado por webhook;
@@ -62,8 +65,8 @@ involucradas en el modelo conceptual.
 - **Estados del dominio:** definidos como `CHECK` en `schema.sql` y replicados
   en [README.md sección 4.5](../README.md) y [database/diagrama-er.md](../database/diagrama-er.md).
 - **Ubicación separada:** los datos geográficos de una feria se modelan como
-  entidad `UBICACION` separada, que persiste strings, coordenadas e IDs
-  devueltos por GeoRef.
+  entidad `UBICACION` separada, que persiste los nombres normalizados y las
+  coordenadas, sin identificadores internos de GeoRef.
 - **Roles multivaluados:** un usuario puede tener rol `ORGANIZADOR`,
   `EMPRENDEDOR` o ambos; en el modelo conceptual es un atributo multivaluado
   de `USUARIO` y en el DDL se implementa como tabla `usuario_rol`. No es una
@@ -71,4 +74,20 @@ involucradas en el modelo conceptual.
 - **Cupos y puestos (v1):** la feria no almacena un atributo de cupos; la
   cantidad de cupos se deduce de la cantidad de `PUESTO` asociados. Una feria
   puede estar en `BORRADOR` sin puestos, pero debe tener al menos uno para pasar
-  a `PUBLICADA`. (Ver [database/diagrama-er.md](../database/diagrama-er.md).)
+  a `PUBLICADA`. Los cupos ocupados son las postulaciones `APROBADA_PENDIENTE_PAGO`
+  + `CONFIRMADA`; no se aprueba una postulación sin cupo libre.
+  (Ver [database/diagrama-er.md](../database/diagrama-er.md).)
+- **Backend modular:** paquetes por módulo funcional (`auth`, `feria`, `puesto`,
+  `postulacion`, `pago`, `credencial`, `acreditacion`, `panel`, `publico`, más
+  `common`/`config`); los módulos se comunican por servicios, nunca por los
+  repositorios de otro módulo.
+- **Transiciones de feria (manuales):** `BORRADOR → PUBLICADA → EN_CURSO →
+  FINALIZADA`; `CANCELADA` desde cualquier estado no final.
+- **Listado público:** muestra únicamente ferias `PUBLICADA` o `EN_CURSO`.
+- **Vencimientos:** una postulación `APROBADA_PENDIENTE_PAGO` pasa a `VENCIDA`
+  tras `PAGO_PLAZO_HORAS` (72 hs por defecto) contadas desde `aprobada_en`; las
+  credenciales de ferias `FINALIZADA` pasan a `EXPIRADA`. Lo ejecuta un proceso
+  programado.
+- **Autorización:** además del rol, se valida la propiedad del recurso (cada
+  organizador gestiona solo sus ferias; cada emprendedor, solo sus postulaciones
+  y credenciales).

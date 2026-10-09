@@ -36,6 +36,7 @@ classDiagram
         +descripcionEmprendimiento
         +estado: EstadoPostulacion
         +fechaPostulacion
+        +aprobadaEn
     }
 
     class Pago {
