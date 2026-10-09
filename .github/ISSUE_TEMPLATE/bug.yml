@@ -26,6 +26,9 @@ body:
         - Acreditación QR
         - Panel y reportes
         - Listado público
+        - Backend (transversal)
+        - Frontend (transversal)
+        - Infraestructura / DevOps
         - Documentación / General
     validations:
       required: true
