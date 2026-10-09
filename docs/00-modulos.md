@@ -1,14 +1,5 @@
 # Diseño y Módulos
 
-**Fecha de entrega:** 27/09/2026
-
-**Integrantes:** Victor Ivan Sierra · Facundo Miguel Archiria · Nahuel Alfredo Ayala
-
-
-**Tutor:** Sebastián Bruselario
-
----
-
 ## 1. Esquema de base de datos
 
 - Diagrama Entidad-Relación: [`database/diagrama-er.md`](../database/diagrama-er.md)
@@ -23,8 +14,8 @@ Las claves del modelo conceptual son:
 - `FERIA`: identificado por `id`; se relaciona 1 a 1 con `UBICACION`.
 - `UBICACION`: identificada por `feria_id`.
 - `POSTULACION`: identificada por `id`; la combinación `(feria_id, emprendedor_id)` es única.
-- `PAGO`: entidad débil de `POSTULACION`, identificada por `postulacion_id`; `external_reference` es única.
-- `CREDENCIAL`: entidad débil de `POSTULACION`, identificada por `postulacion_id`; `token_uuid` es único.
+- `PAGO`: entidad débil de `POSTULACION`, identificada por `postulacion_id`; `referencia_externa` es única.
+- `CREDENCIAL`: entidad débil de `POSTULACION`, identificada por `postulacion_id`; `token` es único.
 - `PUESTO`: identificado por su clave natural `(feria_id, codigo)`.
 
 Los valores de `estado` replican literalmente los estados definidos en
@@ -39,9 +30,9 @@ involucradas en el modelo conceptual.
 
 | # | Módulo | Descripción | Doc. (sección) | Entidades |
 |---|---|---|---|---|
-| 1 | Autenticación y registro de usuarios | Registro, inicio de sesión y gestión de roles con JWT; un usuario puede tener rol organizador, emprendedor o ambos. | 2.1 | USUARIO |
+| 1 | Autenticación y registro de usuarios | Registro, inicio de sesión y gestión de roles con JWT; un usuario puede tener rol organizador, emprendedor o ambos. | 2.1, 2.2 | USUARIO |
 | 2 | Gestión de ferias (CRUD + estados) | Creación, edición, publicación y finalización de ferias con datos de ubicación validados por GeoRef, categoría permitida, costo y cantidad de puestos. | 2.3, 2.11 | FERIA, UBICACION |
-| 3 | Postulaciones de emprendedores | Envío y evaluación de solicitudes de participación; el organizador aprueba o rechaza y las aprobadas pasan a pendiente de pago. | 2.4 | POSTULACION |
+| 3 | Postulaciones de emprendedores | Envío y evaluación de solicitudes de participación; el organizador aprueba o rechaza y las aprobadas pasan a pendiente de pago. | 2.2, 2.4 | POSTULACION |
 | 4 | Pagos con Mercado Pago (Checkout Pro / Orders) | Generación de órdenes mediante Checkout Pro/Orders API, validación segura por webhook y confirmación automática de la participación. | 2.5, 2.6, 4.3 | PAGO, POSTULACION |
 | 5 | Puestos y asignación | Creación de puestos dentro de una feria y asignación a participantes confirmados, evitando duplicados. | 2.9 | PUESTO, POSTULACION |
 | 6 | Credenciales QR (generación y descarga) | Generación bajo demanda de un QR/SVG por participante confirmado, usando un token UUID sin datos personales. | 2.7, 4.4 | CREDENCIAL, POSTULACION |
@@ -77,3 +68,7 @@ involucradas en el modelo conceptual.
   `EMPRENDEDOR` o ambos; en el modelo conceptual es un atributo multivaluado
   de `USUARIO` y en el DDL se implementa como tabla `usuario_rol`. No es una
   entidad propia.
+- **Cupos y puestos (v1):** la feria no almacena un atributo de cupos; la
+  cantidad de cupos se deduce de la cantidad de `PUESTO` asociados. Una feria
+  puede estar en `BORRADOR` sin puestos, pero debe tener al menos uno para pasar
+  a `PUBLICADA`. (Ver [database/diagrama-er.md](../database/diagrama-er.md).)
