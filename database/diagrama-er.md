@@ -47,6 +47,7 @@ erDiagram
         texto descripcionEmprendimiento
         EstadoPostulacion estado
         fecha fechaPostulacion
+        fecha aprobadaEn
     }
 
     PAGO {
@@ -135,6 +136,7 @@ Representa la solicitud realizada por un emprendedor para participar de una feri
 - `descripcionEmprendimiento`
 - `estado`
 - `fechaPostulacion`
+- `aprobadaEn` (fecha en que se aprobó; base para el plazo de pago)
 
 Estados contemplados:
 

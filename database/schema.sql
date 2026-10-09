@@ -56,6 +56,7 @@ CREATE TABLE postulacion (
     descripcion_emprendimiento TEXT,
     estado VARCHAR(30) NOT NULL DEFAULT 'PENDIENTE',
     fecha_postulacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    aprobada_en DATETIME NULL, -- se setea al pasar a APROBADA_PENDIENTE_PAGO; base para el vencimiento de pago
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
     actualizado_en DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_postulacion_feria FOREIGN KEY (feria_id) REFERENCES feria(id),
