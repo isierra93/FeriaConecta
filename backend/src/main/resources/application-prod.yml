@@ -1,0 +1,11 @@
+# Perfil de produccion: MySQL. Las variables se cargan desde el entorno (ver issue #2).
+# El esquema es gestionado por database/schema.sql; Hibernate solo valida el mapeo.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
