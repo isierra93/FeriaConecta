@@ -166,6 +166,8 @@ Después de la confirmación, la credencial cambiará a `UTILIZADA`. Si se vuelv
 README.md
 ```
 
+Cómo ejecutar el backend y qué variables de entorno necesita: ver [`backend/README.md`](backend/README.md).
+
 ## 7. Seguimiento del proyecto
 
 El desarrollo se organiza en sprints mediante [GitHub Projects](https://github.com/users/isierra93/projects/2/views/1), con Issues vinculados a cada funcionalidad del alcance (sección 2) y Milestones por etapa. El historial completo de commits y decisiones técnicas queda documentado en este repositorio.
