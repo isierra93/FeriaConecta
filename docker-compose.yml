@@ -1,0 +1,34 @@
+# MySQL local para desarrollo de FeriaConecta.
+# Uso (desde la raiz del repo): docker compose up -d
+#
+# El esquema se aplica desde database/schema.sql mediante /docker-entrypoint-initdb.d,
+# que MySQL ejecuta SOLO cuando el volumen de datos esta vacio. Para reaplicar el
+# esquema desde cero: docker compose down -v && docker compose up -d
+#
+# Los valores por defecto coinciden con backend/.env.example. Este archivo es solo
+# para uso local: en el VPS MySQL no se expone a internet (ver issue de despliegue).
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: feriaconecta-mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-feriaconecta}
+      MYSQL_USER: ${MYSQL_USER:-feriaconecta}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cambiar-me}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root-cambiar-me}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql-data:

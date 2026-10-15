@@ -28,6 +28,44 @@ curl http://localhost:8080/api/v1/actuator/health   # {"status":"UP"}
 
 Para usar `prod` localmente: `SPRING_PROFILES_ACTIVE=prod` en el `.env` o en el entorno.
 
+> H2 (perfil `dev`) no replica MySQL: Hibernate crea las tablas desde las entidades
+> y **no** aplica los `CHECK`, `UNIQUE` ni claves compuestas de `database/schema.sql`.
+> Para probar contra el esquema real, usar MySQL local.
+
+## Base de datos local (MySQL con Docker)
+
+`database/schema.sql` es la fuente de verdad del esquema. Hibernate **no** crea ni
+modifica tablas en `prod`: solo valida que las entidades coincidan
+(`ddl-auto=validate`). Nunca usar `update` ni `create` contra MySQL.
+
+1. Levantar MySQL 8.4 desde la **raíz del repo** (requiere Docker Desktop corriendo):
+   ```bash
+   docker compose up -d
+   docker compose ps          # esperar a que figure (healthy)
+   ```
+   La primera vez, MySQL ejecuta `database/schema.sql` sobre la base `feriaconecta` vacía.
+   Usuario `feriaconecta` / contraseña `cambiar-me`, puerto `3306` (coinciden con `.env.example`).
+2. En `backend/.env` poner `SPRING_PROFILES_ACTIVE=prod` (el resto de las variables `DB_*`
+   del ejemplo ya apuntan al contenedor) y ejecutar `./mvnw spring-boot:run`.
+3. Verificar: `curl http://localhost:8080/api/v1/actuator/health` → `{"status":"UP"}`.
+
+Comandos útiles:
+
+```bash
+# Consola SQL dentro del contenedor
+docker compose exec mysql mysql -u feriaconecta -p feriaconecta
+
+# Reaplicar el esquema desde cero (BORRA todos los datos locales).
+# Necesario después de cambiar schema.sql: el script solo corre con el volumen vacío.
+docker compose down -v && docker compose up -d
+
+# Detener MySQL conservando los datos
+docker compose down
+```
+
+> Si el puerto 3306 ya está ocupado por otro MySQL local, detenerlo o cambiar el mapeo
+> de puertos en `docker-compose.yml` y el `DB_URL` del `.env`.
+
 ## Configuración por variables de entorno
 
 La configuración sensible **nunca** se escribe en el código ni en los `.yml`:
