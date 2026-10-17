@@ -63,8 +63,44 @@ docker compose down -v && docker compose up -d
 docker compose down
 ```
 
-> Si el puerto 3306 ya está ocupado por otro MySQL local, detenerlo o cambiar el mapeo
-> de puertos en `docker-compose.yml` y el `DB_URL` del `.env`.
+> Si el puerto 3306 ya está ocupado por otro MySQL local, levantar con otro puerto
+> (`MYSQL_PORT=3307 docker compose up -d`) y ajustar el `DB_URL` del `.env`.
+
+## Docker
+
+El `Dockerfile` es multistage: compila con Maven + JDK 21 y ejecuta el `.jar` sobre
+JRE 21 Alpine, con un usuario sin privilegios (`spring`). La imagen arranca con el
+perfil `prod` y toma **toda** su configuración de variables de entorno: el `.env`
+nunca se copia a la imagen (ver `.dockerignore`).
+
+Build (desde `backend/`):
+
+```bash
+docker build -t feriaconecta-backend .
+```
+
+El VPS es **ARM (arm64)**. Las imágenes base son multi-arquitectura, así que alcanza
+con construir en el propio VPS. Para construir para ARM desde una PC x86:
+
+```bash
+docker buildx build --platform linux/arm64 -t feriaconecta-backend:arm64 .
+```
+
+Ejecutar localmente contra el MySQL del `docker-compose.yml` (con MySQL levantado):
+
+```bash
+docker run --rm --name fc-backend --network feriaconecta_default -p 8080:8080 \
+  --env-file .env \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  -e DB_URL=jdbc:mysql://mysql:3306/feriaconecta \
+  feriaconecta-backend
+```
+
+> Dentro del contenedor `localhost` es el propio contenedor: a MySQL se llega por el
+> nombre del servicio (`mysql`) y su puerto interno `3306`, sin importar `MYSQL_PORT`.
+
+La imagen incluye un `HEALTHCHECK` contra `/api/v1/actuator/health`
+(`docker ps` muestra `healthy` cuando la app está lista).
 
 ## Configuración por variables de entorno
 
