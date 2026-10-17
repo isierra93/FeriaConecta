@@ -74,6 +74,8 @@ El sistema se despliega en dos entornos distintos según el componente, aprovech
 | **Base de datos (MySQL)** | Mismo VPS (Oracle Cloud)  | Contenedor MySQL ya operativo, con volumen persistente para los datos. Accesible solo por red interna Docker desde el contenedor del backend (nombre de servicio, no IP pública).                     |
 | **Frontend (React)**      | Vercel                    | Build estático (Vite) desplegado con CI/CD automático desde GitHub (cada push a `main` dispara un nuevo deploy). Consume la API pública vía HTTPS.                                                    |
 
+El procedimiento de despliegue y redeploy del backend está en [`docs/despliegue.md`](docs/despliegue.md).
+
 ### 4.2. Integración con la API GeoRef
 
 Se utilizará **GeoRef**, el Servicio de Normalización de Datos Geográficos de Argentina, como API REST externa. Su función será asistir el autocompletado y validar o normalizar la ubicación de la feria al momento de crearla.
