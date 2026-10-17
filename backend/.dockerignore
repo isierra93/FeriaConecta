@@ -1,0 +1,30 @@
+# Contexto minimo para el build: solo pom.xml y src/
+
+# Secretos: nunca entran a la imagen
+.env
+.env.*
+
+# Salida de compilacion
+target/
+
+# Maven wrapper (la imagen de build ya trae Maven)
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDEs
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+*.iml
+
+# Varios
+*.log
+HELP.md
+README.md
+.git*
+Dockerfile
+.dockerignore
