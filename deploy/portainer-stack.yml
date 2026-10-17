@@ -1,0 +1,34 @@
+# Stack de produccion de FeriaConecta para Portainer (VPS Oracle).
+# Uso: Portainer -> Stacks -> Add stack "feriaconecta" -> Web editor -> pegar este archivo.
+# Los valores de ${VAR} se cargan en "Environment variables" del stack (nunca en el repo).
+# Procedimiento completo y redeploy: docs/despliegue.md
+#
+# - Reutiliza el MySQL existente (mysql-central) de la red externa red-backend.
+# - Sin "ports": el 8080 no se publica en el host. Nginx Proxy Manager llega por la
+#   red red-backend a feriaconecta-api:8080.
+services:
+  feriaconecta-api:
+    image: isierra93/feriaconecta-backend:${IMAGE_TAG}
+    container_name: feriaconecta-api
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=jdbc:mysql://mysql-central:3306/feriaconecta?useSSL=false&serverTimezone=America/Argentina/Buenos_Aires&allowPublicKeyRetrieval=true
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      - MP_ACCESS_TOKEN=${MP_ACCESS_TOKEN}
+      - MP_WEBHOOK_SECRET=${MP_WEBHOOK_SECRET}
+      - APP_BACKEND_URL=${APP_BACKEND_URL}
+      - APP_FRONTEND_URL=${APP_FRONTEND_URL}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      - PAGO_PLAZO_HORAS=${PAGO_PLAZO_HORAS}
+    networks:
+      - red-backend
+
+# La red ya existe: la creo el stack de MySQL central
+networks:
+  red-backend:
+    external: true
+    name: red-backend
