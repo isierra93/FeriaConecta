@@ -101,3 +101,34 @@ Si se detectan diferencias de formato, ejecutar `pnpm format` y volver
 a comprobarlo.
 
 Revisar también los cambios preparados en Git antes de confirmar el commit.
+
+## Despliegue en Vercel
+
+El frontend se despliega desde este repositorio mediante la integración
+de GitHub con Vercel.
+
+Configuración del proyecto:
+
+| Campo             | Valor      |
+| ----------------- | ---------- |
+| Framework Preset  | Vite       |
+| Root Directory    | frontend   |
+| Build Command     | pnpm build |
+| Output Directory  | dist       |
+| Production Branch | main       |
+
+Una vez conectado el repositorio, los cambios publicados en `main`
+generarán despliegues de producción.
+
+El archivo `vercel.json` configura el rewrite hacia `index.html` para
+permitir el acceso directo y la recarga de rutas de la aplicación.
+
+### API y variables de entorno
+
+En Vercel se debe configurar `VITE_API_URL` con la URL pública del backend,
+incluyendo el prefijo `/api/v1`.
+
+El valor local de desarrollo está documentado en `.env.example`.
+
+Al modificar `VITE_API_URL` en Vercel, se necesita un nuevo despliegue
+para incorporar el valor al build.
