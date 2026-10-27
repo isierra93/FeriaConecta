@@ -1,7 +1,7 @@
 # Stack de produccion de FeriaConecta para Portainer (VPS Oracle).
 # Uso: Portainer -> Stacks -> Add stack "feriaconecta" -> Web editor -> pegar este archivo.
 # Los valores de ${VAR} se cargan en "Environment variables" del stack (nunca en el repo).
-# Procedimiento completo y redeploy: docs/despliegue.md
+# Procedimiento completo y redeploy: docs/08-despliegue.md
 #
 # - Reutiliza el MySQL existente (mysql-central) de la red externa red-backend.
 # - Sin "ports": el 8080 no se publica en el host. Nginx Proxy Manager llega por la
