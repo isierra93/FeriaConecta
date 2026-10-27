@@ -118,7 +118,7 @@ En NPM → Hosts → **Add Proxy Host**:
 
 | Campo | Valor |
 |-------|-------|
-| Domain Names | `api.<dominio>` |
+| Domain Names | `api.feriaconecta.isierra93.site` |
 | Scheme | `http` |
 | Forward Hostname / IP | `feriaconecta-api` |
 | Forward Port | `8080` |
