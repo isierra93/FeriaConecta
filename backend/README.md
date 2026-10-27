@@ -32,6 +32,69 @@ Para usar `prod` localmente: `SPRING_PROFILES_ACTIVE=prod` en el `.env` o en el 
 > y **no** aplica los `CHECK`, `UNIQUE` ni claves compuestas de `database/schema.sql`.
 > Para probar contra el esquema real, usar MySQL local.
 
+## Estructura del código (monolito modular)
+
+El backend es un **monolito modular**: un paquete por módulo funcional, con sus
+capas adentro. No se empaqueta por capa (`controller/`, `service/`... en la raíz).
+
+```text
+com.feriaconecta.backend
+├── auth/            ├── controller/   REST: recibe y devuelve DTOs
+├── feria/           ├── service/      reglas de negocio, @Transactional
+├── puesto/          ├── repository/   Spring Data (privado del módulo)
+├── postulacion/     ├── dto/          request / response
+├── pago/            └── model/        entidades JPA y enums (nunca se exponen)
+├── credencial/
+├── acreditacion/    (cada módulo tiene los 5 subpaquetes de la derecha)
+├── panel/
+├── publico/
+├── common/          exception/, dto/ (ApiError), util/
+└── config/          seguridad, CORS, OpenAPI, propiedades
+```
+
+| Módulo | Responsabilidad | Servicio expuesto |
+|--------|-----------------|-------------------|
+| `auth` | Registro, login con JWT y roles `ORGANIZADOR` / `EMPRENDEDOR`. | `UsuarioService` |
+| `feria` | CRUD de ferias, estados y ubicación (GeoRef). | `FeriaService` |
+| `puesto` | CRUD de puestos de una feria y asignación a participantes confirmados. | `PuestoService` |
+| `postulacion` | Postulaciones de emprendedores y su aprobación / rechazo. | `PostulacionService` |
+| `pago` | Orden de Mercado Pago y confirmación por webhook. | `PagoService` |
+| `credencial` | Token UUID y SVG del QR bajo demanda. | `CredencialService` |
+| `acreditacion` | Escaneo y validación del QR el día del evento (sin tabla propia). | `AcreditacionService` |
+| `panel` | Estadísticas y reportes del organizador (solo lectura). | `PanelService` |
+| `publico` | Listado público de ferias sin autenticación (solo lectura). | `PublicoService` |
+
+Cada paquete tiene un `package-info.java` que describe su responsabilidad y, en la
+raíz de cada módulo, de qué módulos depende.
+
+### Reglas de dependencia entre módulos
+
+1. Un módulo usa los **servicios** públicos de otro módulo, **nunca** sus
+   repositorios. El `repository` de un módulo solo lo usa su propio `service`.
+2. Los controladores trabajan con DTOs: ninguna entidad de `model` sale por la API.
+3. `common` y `config` no dependen de ningún módulo funcional.
+4. Dirección de dependencias (sin ciclos):
+
+   | Módulo | Depende de |
+   |--------|------------|
+   | `auth` | — |
+   | `feria` | `auth` |
+   | `puesto` | `feria` |
+   | `postulacion` | `auth`, `feria`, `puesto` (cupos) |
+   | `credencial` | `postulacion` |
+   | `pago` | `postulacion`, `credencial` (al aprobarse el pago, la postulación pasa a `CONFIRMADA` y se crea la credencial) |
+   | `acreditacion` | `credencial`, `postulacion`, `pago` |
+   | `panel` | `feria`, `puesto`, `postulacion`, `pago`, `credencial` (solo lectura) |
+   | `publico` | `feria` (solo lectura) |
+
+   Nadie depende de `panel`, `publico` ni `acreditacion`.
+5. **Puntos a acordar** en sus issues para no crear ciclos:
+   - Publicar una feria exige al menos 1 puesto (`feria` → `puesto`), pero `puesto`
+     depende de `feria`. Se resuelve en el issue de ferias, por ejemplo orquestando
+     la publicación desde un servicio que dependa de ambos o con un evento de Spring.
+   - Asignar un puesto exige una postulación `CONFIRMADA` (`puesto` → `postulacion`),
+     pero `postulacion` usa `puesto` para los cupos. Mismo criterio.
+
 ## Base de datos local (MySQL con Docker)
 
 `database/schema.sql` es la fuente de verdad del esquema. Hibernate **no** crea ni
