@@ -4,6 +4,16 @@ Procedimiento para publicar el backend de FeriaConecta en el VPS de Oracle Cloud
 (Docker + Portainer + Nginx Proxy Manager), según la arquitectura de la sección 4.1
 del [README](../README.md#41-arquitectura-de-despliegue).
 
+## URLs públicas
+
+| Componente | URL |
+|------------|-----|
+| Backend (API) | https://api.feriaconecta.isierra93.site/api/v1 |
+| Frontend | https://feria-conecta.vercel.app |
+
+El frontend se despliega en Vercel con CI/CD desde `main`; su configuración
+está en [`frontend/README.md`](../frontend/README.md#despliegue-en-vercel).
+
 ## Topología
 
 ```
@@ -90,9 +100,9 @@ docker buildx build --platform linux/arm64 \
    JWT_EXPIRATION_MINUTES=60
    MP_ACCESS_TOKEN=<access token de PRUEBA de Mercado Pago>
    MP_WEBHOOK_SECRET=<clave secreta del webhook>
-   APP_BACKEND_URL=https://api.<dominio>/api/v1
-   APP_FRONTEND_URL=https://<app>.vercel.app
-   CORS_ALLOWED_ORIGINS=https://<app>.vercel.app
+   APP_BACKEND_URL=https://api.feriaconecta.isierra93.site/api/v1
+   APP_FRONTEND_URL=https://feria-conecta.vercel.app
+   CORS_ALLOWED_ORIGINS=https://feria-conecta.vercel.app
    PAGO_PLAZO_HORAS=72
    ```
 

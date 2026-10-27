@@ -16,7 +16,8 @@ Forma parte del repositorio principal y se encuentra en `/frontend`.
 ## Entorno utilizado
 
 - Node.js 24.
-- pnpm 10.33.0, declarado en `package.json`.
+- pnpm 10.33.0, declarado en `package.json`. Si no está instalado, se
+  puede habilitar con `corepack enable` (incluido en Node.js).
 
 Los comandos siguientes deben ejecutarse desde la carpeta `frontend`.
 
@@ -107,6 +108,11 @@ Revisar también los cambios preparados en Git antes de confirmar el commit.
 El frontend se despliega desde este repositorio mediante la integración
 de GitHub con Vercel.
 
+| Entorno            | URL                                            |
+| ------------------ | ---------------------------------------------- |
+| Frontend           | https://feria-conecta.vercel.app               |
+| API (backend, VPS) | https://api.feriaconecta.isierra93.site/api/v1 |
+
 Configuración del proyecto:
 
 | Campo             | Valor      |
@@ -116,19 +122,43 @@ Configuración del proyecto:
 | Build Command     | pnpm build |
 | Output Directory  | dist       |
 | Production Branch | main       |
+| Node.js Version   | 24.x       |
 
-Una vez conectado el repositorio, los cambios publicados en `main`
-generarán despliegues de producción.
+Cada cambio integrado en `main` genera un despliegue de producción. Los
+pull requests generan despliegues de preview con una URL propia.
 
-El archivo `vercel.json` configura el rewrite hacia `index.html` para
-permitir el acceso directo y la recarga de rutas de la aplicación.
+El archivo `vercel.json` reescribe todas las rutas hacia `index.html` para
+permitir el acceso directo y la recarga de rutas de la aplicación (por
+ejemplo `/ferias`). Los archivos que existen en `dist` (JS, CSS, imágenes)
+se sirven antes de aplicar el rewrite.
 
 ### API y variables de entorno
 
-En Vercel se debe configurar `VITE_API_URL` con la URL pública del backend,
-incluyendo el prefijo `/api/v1`.
+En Vercel (entorno Production) se configura `VITE_API_URL` con la URL
+pública del backend, incluyendo el prefijo `/api/v1`:
+
+```dotenv
+VITE_API_URL=https://api.feriaconecta.isierra93.site/api/v1
+```
 
 El valor local de desarrollo está documentado en `.env.example`.
 
 Al modificar `VITE_API_URL` en Vercel, se necesita un nuevo despliegue
 para incorporar el valor al build.
+
+### CORS
+
+El origen `https://feria-conecta.vercel.app` está registrado en las
+variables `APP_FRONTEND_URL` y `CORS_ALLOWED_ORIGINS` del backend (stack
+de Portainer). Solo se permite el dominio de producción: las URLs de
+preview de Vercel no se agregan a CORS.
+
+> El backend todavía no aplica la configuración de CORS; se implementa en
+> el issue "Configurar CORS en el backend". Hasta entonces, las peticiones
+> desde el navegador hacia la API son bloqueadas.
+
+### Verificación del despliegue
+
+- El build del deploy finaliza sin errores en el panel de Vercel.
+- `https://feria-conecta.vercel.app/ferias` responde con la aplicación al
+  recargar la página (sin 404 de Vercel).

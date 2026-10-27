@@ -177,7 +177,7 @@ se lee desde variables de entorno.
   Spring lee automáticamente `backend/.env` (si existe) al ejecutar desde esta carpeta.
   El archivo `.env` está ignorado por git.
 - **Producción:** las variables se cargan en el stack de Portainer, no en el repositorio
-  (ver [`docs/despliegue.md`](../docs/despliegue.md)).
+  (ver [`docs/08-despliegue.md`](../docs/08-despliegue.md)).
 
 ### Variables
 

@@ -74,7 +74,10 @@ El sistema se despliega en dos entornos distintos según el componente, aprovech
 | **Base de datos (MySQL)** | Mismo VPS (Oracle Cloud)  | Contenedor MySQL ya operativo, con volumen persistente para los datos. Accesible solo por red interna Docker desde el contenedor del backend (nombre de servicio, no IP pública).                     |
 | **Frontend (React)**      | Vercel                    | Build estático (Vite) desplegado con CI/CD automático desde GitHub (cada push a `main` dispara un nuevo deploy). Consume la API pública vía HTTPS.                                                    |
 
-El procedimiento de despliegue y redeploy del backend está en [`docs/despliegue.md`](docs/despliegue.md).
+El procedimiento de despliegue y redeploy del backend está en [`docs/08-despliegue.md`](docs/08-despliegue.md); la configuración del frontend en Vercel, en [`frontend/README.md`](frontend/README.md#despliegue-en-vercel).
+
+- **Frontend:** https://feria-conecta.vercel.app
+- **API:** https://api.feriaconecta.isierra93.site/api/v1
 
 ### 4.2. Integración con la API GeoRef
 
