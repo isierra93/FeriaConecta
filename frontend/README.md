@@ -8,6 +8,7 @@ Forma parte del repositorio principal y se encuentra en `/frontend`.
 ## Tecnologías
 
 - React y TypeScript.
+- React Router v7 (paquete `react-router`) para la navegación.
 - Vite como herramienta de desarrollo y compilación.
 - pnpm para gestionar dependencias.
 - ESLint para analizar el código.
@@ -74,6 +75,62 @@ El código del frontend se encuentra en `src`.
 | `types`      | Tipos e interfaces compartidos de TypeScript.           |
 | `context`    | Contextos y proveedores de React para compartir estado. |
 | `assets`     | Recursos estáticos importados desde el código.          |
+
+## Rutas
+
+La navegación usa React Router v7 en modo _data router_
+(`createBrowserRouter` + `RouterProvider`). Todas las rutas se definen
+en `src/router.ts`; las pantallas viven en `src/pages` y el layout con
+la navegación principal (`MainLayout`) en `src/components`.
+
+### Convención
+
+| Ruta                          | Acceso                         |
+| ----------------------------- | ------------------------------ |
+| `/`, `/ferias`, `/ferias/:id` | Pública.                       |
+| `/login`, `/registro`         | Pública (solo sin sesión).     |
+| `/organizador/...`            | Requiere el rol `ORGANIZADOR`. |
+| `/emprendedor/...`            | Requiere el rol `EMPRENDEDOR`. |
+| `/acreditar/:token`           | Requiere el rol `ORGANIZADOR`. |
+| `*`                           | Página 404 (`NotFoundPage`).   |
+
+- Los segmentos de las rutas están en español y en minúsculas
+  (`kebab-case` si tienen varias palabras), porque son términos del
+  dominio: `/organizador/ferias/:id/puestos`.
+- Las pantallas exclusivas de un rol van bajo su prefijo
+  (`/organizador/...` o `/emprendedor/...`).
+- `/acreditar/:token` es una excepción al prefijo: es la URL que
+  contiene la credencial QR, por lo que debe mantenerse corta y estable.
+  Tras iniciar sesión, el usuario vuelve a la ruta original.
+- Todas las rutas son hijas de `MainLayout`, incluida la 404, para
+  conservar la navegación.
+
+### Rutas protegidas
+
+El guard se implementa en el issue "Autenticación y registro de
+usuarios — Frontend". Las rutas protegidas se agrupan bajo un _layout
+route_ sin `path` que recibe los roles permitidos y renderiza un
+`<Outlet />` si el usuario cumple los requisitos:
+
+```ts
+{
+  Component: OrganizadorRoute, // guard con roles={['ORGANIZADOR']}
+  children: [
+    { path: 'organizador/ferias', Component: MisFeriasPage },
+    { path: 'acreditar/:token', Component: AcreditarPage },
+  ],
+}
+```
+
+- Sin sesión: redirige a `/login`, conservando la ruta solicitada para
+  volver después del inicio de sesión.
+- Con sesión pero sin el rol requerido: no muestra la pantalla
+  (el comportamiento exacto se define en el issue de autenticación).
+- El guard solo mejora la experiencia: la autorización real la aplica
+  el backend en cada petición.
+
+El rewrite de `vercel.json` hacia `index.html` permite acceder
+directamente o recargar cualquiera de estas rutas en el despliegue.
 
 ## Convenciones
 
