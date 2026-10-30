@@ -8,6 +8,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -90,6 +92,42 @@ public class JwtConfig {
         }
         //se convierte los minutos a una duration de Java
         return Duration.ofMinutes(minutes);
+    }
+
+
+    /**
+     * Configura la conversión de roles del JWT a autoridades
+     * reconocidas por Spring Security.
+     * <p>
+     * Lee el claim "roles" y agrega el prefijo "ROLE_"
+     * Claim del JWT	Autoridad generada
+     * ORGANIZADOR	-->    ROLE_ORGANIZADOR
+     * EMPRENDEDOR	-->    ROLE_EMPRENDEDOR
+     * Ambos roles	-->    Ambas autoridades
+     * a cada valor para utilizarlo en las reglas de acceso.
+     */
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        // Se configura cómo interpretar los roles del token.
+        JwtGrantedAuthoritiesConverter rolesConverter =
+                new JwtGrantedAuthoritiesConverter();
+
+        // Indica el claim que contiene los roles.
+        rolesConverter.setAuthoritiesClaimName("roles");
+
+        // Agrega el prefijo utilizado por Spring Security.
+        rolesConverter.setAuthorityPrefix("ROLE_");
+
+        // se configura el convertidor de autenticación.
+        JwtAuthenticationConverter authenticationConverter =
+                new JwtAuthenticationConverter();
+
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(
+                rolesConverter
+        );
+
+        return authenticationConverter;
     }
 
 }
