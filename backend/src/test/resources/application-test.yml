@@ -1,0 +1,15 @@
+# Perfil exclusivo para pruebas automatizadas.
+# La conexión MySQL será proporcionada por Testcontainers.
+
+spring:
+  jpa:
+    hibernate:
+      # Valida las entidades JPA contra el esquema SQL existente.
+      # No crea ni modifica automáticamente las tablas.
+      ddl-auto: validate
+
+  sql:
+    init:
+      # El esquema se inicializará desde Testcontainers.
+      # Evitamos una segunda inicialización por Spring SQL.
+      mode: never
