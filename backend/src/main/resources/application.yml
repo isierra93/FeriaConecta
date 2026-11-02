@@ -11,6 +11,13 @@ spring:
 server:
   servlet:
     context-path: /api/v1
+  # Defensa adicional para errores que no pasan por GlobalExceptionHandler:
+  # nunca exponer stack traces ni mensajes internos al cliente.
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
 
 # Actuator: se expone unicamente el endpoint health
 management:
