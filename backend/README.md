@@ -25,12 +25,54 @@ curl http://localhost:8080/api/v1/actuator/health   # {"status":"UP"}
 |--------|---------------|-----|
 | `dev` (por defecto) | H2 en memoria, consola en `/api/v1/h2-console` | Desarrollo local. Arranca sin `.env` gracias a valores por defecto de desarrollo. |
 | `prod` | MySQL (`ddl-auto=validate`, esquema en `database/schema.sql`) | Despliegue. Todas las variables obligatorias deben estar definidas. |
+| `test` | MySQL 8.4 con Testcontainers | Pruebas de integración automatizadas. Utiliza `database/schema.sql` y `ddl-auto=validate`. |
 
 Para usar `prod` localmente: `SPRING_PROFILES_ACTIVE=prod` en el `.env` o en el entorno.
 
 > H2 (perfil `dev`) no replica MySQL: Hibernate crea las tablas desde las entidades
 > y **no** aplica los `CHECK`, `UNIQUE` ni claves compuestas de `database/schema.sql`.
-> Para probar contra el esquema real, usar MySQL local.
+> Para las pruebas de integración se utiliza MySQL con Testcontainers,
+> aplicando el esquema real de `database/schema.sql`.
+
+
+## Pruebas automatizadas
+
+El backend utiliza JUnit y Mockito para pruebas unitarias,
+y MySQL 8.4 con Testcontainers para pruebas de integración.
+
+### Requisitos
+
+- Java 21.
+- Docker Desktop iniciado para ejecutar las pruebas de integración.
+
+### Ejecución
+
+Desde la carpeta `backend/`:
+
+```bash
+# Ejecutar todas las pruebas
+./mvnw test
+
+# Ejecutar únicamente la prueba unitaria de ejemplo
+./mvnw -Dtest=MockitoEjemploTest test
+
+# Ejecutar únicamente la prueba de integración
+./mvnw -Dtest=MySqlIntegracionTest test
+```
+
+Las pruebas unitarias con Mockito no requieren Docker.
+
+La prueba de integración inicia automáticamente un contenedor temporal
+de MySQL, aplica `database/schema.sql` y utiliza el perfil `test`,
+configurado con `ddl-auto=validate`.
+
+No es necesario crear manualmente la base de datos de pruebas.
+
+### Integración continua
+
+GitHub Actions ejecuta `./mvnw test` con Java 21 al abrir o
+actualizar un Pull Request, mediante `.github/workflows/backend-tests.yml`.
+
 
 ## Estructura del código (monolito modular)
 
