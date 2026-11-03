@@ -97,6 +97,11 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Autenticación JWT con Spring Security y Nimbus -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+		</dependency>
 
 		<!-- Integración de Testcontainers con Spring Boot -->
 		<dependency>
@@ -113,6 +118,7 @@
 		</dependency>
 
 	</dependencies>
+
 
 	<build>
 		<plugins>
