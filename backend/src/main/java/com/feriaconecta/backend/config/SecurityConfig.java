@@ -22,7 +22,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter, Environment environment) throws Exception {
 
         //H2 solo se habilita en desarrollo
-        boolean habilitarH2 = environment.matchesProfiles("dev") && !environment.matchesProfiles("dev");
+        boolean habilitarH2 = environment.matchesProfiles("dev") && !environment.matchesProfiles("prod");
 
         http
                 //La apu utiliza JWT, por lo que no necesita proteccion CSRF

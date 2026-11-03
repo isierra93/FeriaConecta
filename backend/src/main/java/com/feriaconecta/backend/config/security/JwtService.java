@@ -62,7 +62,7 @@ public class JwtService {
         //se define los dato incluidos en el token
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(Long.toString(userId))
-                .claim("role", List.copyOf(roles))
+                .claim("roles", List.copyOf(roles))
                 .issuedAt(now)
                 .expiresAt(now.plus(jwtExpiration))
                 .build();
