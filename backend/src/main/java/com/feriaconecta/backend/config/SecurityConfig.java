@@ -1,5 +1,7 @@
 package com.feriaconecta.backend.config;
 
+import com.feriaconecta.backend.config.security.ApiAccessDeniedHandler;
+import com.feriaconecta.backend.config.security.ApiAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -19,7 +21,7 @@ import org.springframework.core.env.Environment;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter, Environment environment) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter, Environment environment, ApiAuthenticationEntryPoint apiAuthenticationEntryPoint, ApiAccessDeniedHandler apiAccessDeniedHandler) throws Exception {
 
         //H2 solo se habilita en desarrollo
         boolean habilitarH2 = environment.matchesProfiles("dev") && !environment.matchesProfiles("prod");
@@ -29,7 +31,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 //no crea ni utiliza sesiones HTTP para recuperar autenticacion
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(apiAuthenticationEntryPoint)
+                        .accessDeniedHandler(apiAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> {
                     //registro e inicio de sesion
                     auth.requestMatchers(
@@ -62,7 +66,10 @@ public class SecurityConfig {
                 })
                 //se utiliza el filtro jwt que proporciona spring security
                 //el token se valida mediante el jwtDecoder configurado
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(apiAuthenticationEntryPoint)
+                        .accessDeniedHandler(apiAccessDeniedHandler)
+                        .jwt(jwt -> jwt
                         // Utiliza el convertidor definido en JwtConfig.
                         // Transforma ORGANIZADOR en ROLE_ORGANIZADOR
                         // y EMPRENDEDOR en ROLE_EMPRENDEDOR.
