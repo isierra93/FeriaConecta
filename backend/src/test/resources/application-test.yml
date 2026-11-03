@@ -13,3 +13,9 @@ spring:
       # El esquema se inicializará desde Testcontainers.
       # Evitamos una segunda inicialización por Spring SQL.
       mode: never
+
+# Clave JWT exclusiva para pruebas automatizadas.
+# No se utiliza en producción.
+feriaconecta:
+  jwt:
+    secret: ${JWT_SECRET:test-secret-feriaconecta-solo-para-pruebas-0123456789}
