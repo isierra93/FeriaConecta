@@ -19,3 +19,7 @@ spring:
 feriaconecta:
   jwt:
     secret: ${JWT_SECRET:test-secret-feriaconecta-solo-para-pruebas-0123456789}
+
+  # Origen permitido durante las pruebas automatizadas de CORS.
+  cors:
+    allowed-origins: http://localhost:5173
