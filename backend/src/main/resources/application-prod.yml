@@ -9,3 +9,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+# Swagger no se expone en produccion: la API es publica via Nginx Proxy Manager.
+# Las rutas quedan en permitAll en SecurityConfig, pero responden 404.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

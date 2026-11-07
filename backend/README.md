@@ -34,6 +34,29 @@ Para usar `prod` localmente: `SPRING_PROFILES_ACTIVE=prod` en el `.env` o en el 
 > Para las pruebas de integración se utiliza MySQL con Testcontainers,
 > aplicando el esquema real de `database/schema.sql`.
 
+### Swagger / OpenAPI
+
+Documentación interactiva con springdoc-openapi (habilitada en `dev`):
+
+- Swagger UI: http://localhost:8080/api/v1/swagger-ui.html
+- Especificación OpenAPI (JSON): http://localhost:8080/api/v1/v3/api-docs
+
+Para probar endpoints protegidos: obtener un token con `POST /auth/login`, hacer
+clic en **Authorize** y pegar solo el token (sin el prefijo `Bearer`). El token se
+conserva al recargar la página.
+
+En **producción está deshabilitado** (`application-prod.yml`): las rutas
+responden 404.
+
+Convenciones para documentar controllers (configuración en `config/OpenApiConfig`):
+
+- Agrupar por módulo con `@Tag(name = OpenApiConfig.TAG_FERIA)` (hay una
+  constante por cada módulo: `auth`, `feria`, `puesto`, `postulacion`, `pago`,
+  `credencial`, `acreditacion`, `panel`, `publico`).
+- Todos los endpoints requieren JWT por defecto. Los públicos (`/auth/login`,
+  `/auth/registro`, `/public/**`) se anotan con `@SecurityRequirements()` vacío.
+- Describir cada operación con `@Operation(summary = "...")` en español.
+
 
 ## Pruebas automatizadas
 
