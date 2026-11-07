@@ -26,6 +26,21 @@ management:
       exposure:
         include: health
 
+# Documentacion OpenAPI / Swagger UI (rutas relativas al context-path /api/v1).
+# Deshabilitado en produccion (application-prod.yml).
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+    # Conserva el token cargado en "Authorize" al recargar la pagina
+    persist-authorization: true
+  default-produces-media-type: application/json
+
 logging:
   level:
     com.feriaconecta.backend: INFO
