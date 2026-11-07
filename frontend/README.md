@@ -132,6 +132,32 @@ route_ sin `path` que recibe los roles permitidos y renderiza un
 El rewrite de `vercel.json` hacia `index.html` permite acceder
 directamente o recargar cualquiera de estas rutas en el despliegue.
 
+## Cliente HTTP
+
+Todas las llamadas al backend pasan por el cliente de `src/api/`
+(`fetch` nativo, sin dependencias):
+
+```ts
+import { apiClient, ApiRequestError } from '../api'
+
+const ferias = await apiClient.get<Feria[]>('/ferias')
+await apiClient.post('/auth/login', credenciales, { auth: false })
+```
+
+- La URL base se toma de `VITE_API_URL`, que ya incluye `/api/v1`. Las
+  rutas se escriben relativas y sin ese prefijo (`/auth/login`).
+- Si hay un token guardado (`tokenStorage`), se envía como
+  `Authorization: Bearer <token>`. Con `{ auth: false }` no se adjunta.
+- Cualquier respuesta no exitosa lanza `ApiRequestError`, con `status`,
+  `message` (el mensaje del backend, en español), `apiError` (el cuerpo
+  `ApiError` completo) y `fieldErrors` (errores de validación por
+  campo). Sin conexión con el servidor, `status` es `0`.
+- Un `401` en una petición que llevaba token se considera sesión
+  expirada: se borra el token y se notifica a los callbacks registrados
+  con `onUnauthorized(callback)`, que devuelve la función para
+  desuscribirse. El `AuthContext` usa este evento para cerrar la sesión
+  y redirigir al login.
+
 ## Convenciones
 
 - Componentes y páginas: PascalCase, por ejemplo `FeriaCard.tsx`.

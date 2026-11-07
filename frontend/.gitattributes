@@ -1,0 +1,13 @@
+# Finales de línea LF en el working copy, sin importar core.autocrlf.
+# Coincide con "endOfLine": "lf" de .prettierrc.json.
+* text=auto eol=lf
+
+# Binarios: sin conversión.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
