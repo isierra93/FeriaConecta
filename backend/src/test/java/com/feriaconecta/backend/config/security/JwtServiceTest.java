@@ -36,7 +36,7 @@ public class JwtServiceTest {
                 "EMPRENDEDOR"
         );
 
-        String token = service.generarToken(15L, roles);
+        String token = service.generarToken(15, roles);
 
         //Valida la firma y recupera los datos del token
         Jwt jwt = service.validarToken(token);
@@ -66,7 +66,7 @@ public class JwtServiceTest {
                 Duration.ofMinutes(60)
         );
 
-        String token = service.generarToken(15L, List.of("ORGANIZADOR"));
+        String token = service.generarToken(15, List.of("ORGANIZADOR"));
 
         //la validacion debe rechazar la firma incorrecta
         assertThrows(
@@ -125,7 +125,7 @@ public class JwtServiceTest {
         );
 
         //genera un jwt con ambos roles
-        String token = service.generarToken(15L, List.of("ORGANIZADOR", "EMPRENDEDOR"));
+        String token = service.generarToken(15, List.of("ORGANIZADOR", "EMPRENDEDOR"));
 
         Jwt jwt = service.validarToken(token);
 

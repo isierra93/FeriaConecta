@@ -34,7 +34,7 @@ class CurrentUserTest {
         try {
             CurrentUser currentUser = new CurrentUser();
 
-            assertEquals(Long.valueOf(15L), currentUser.getId());
+            assertEquals(Integer.valueOf(15), currentUser.getId());
             assertEquals(roles, currentUser.getRoles());
 
         } finally {

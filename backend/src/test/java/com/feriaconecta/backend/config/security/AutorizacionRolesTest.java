@@ -235,7 +235,7 @@ class AutorizacionRolesTest {
 
         // Genera un JWT válido con el rol ORGANIZADOR.
         String token = jwtService.generarToken(
-                15L,
+                15,
                 List.of("ORGANIZADOR")
         );
 
@@ -253,7 +253,7 @@ class AutorizacionRolesTest {
 
         // Genera un JWT válido con el rol EMPRENDEDOR.
         String token = jwtService.generarToken(
-                16L,
+                16,
                 List.of("EMPRENDEDOR")
         );
 
