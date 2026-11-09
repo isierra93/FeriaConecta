@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OpenApiConfigTest {
 
     @Nested
-    @SpringBootTest
+    @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
     @AutoConfigureMockMvc
     @ActiveProfiles("test")
     class Habilitado {
@@ -65,13 +65,55 @@ class OpenApiConfigTest {
                     .andExpect(header().string(HttpHeaders.LOCATION,
                             containsString("swagger-ui/index.html")));
         }
+
+
+        /**
+         * Verifica que OpenAPI documente los tres endpoints
+         * de autenticación y los códigos HTTP del registro.
+         */
+        @Test
+        void debeDocumentarEndpointsDeAutenticacion() throws Exception {
+
+            mockMvc.perform(
+                            get("/api/v1/v3/api-docs")
+                                    .contextPath("/api/v1"))
+                    .andExpect(status().isOk())
+
+                    // Registro de usuarios.
+                    .andExpect(jsonPath(
+                            "$.paths['/auth/registro'].post.summary"
+                    ).value("Registrar un nuevo usuario"))
+                    .andExpect(jsonPath(
+                            "$.paths['/auth/registro'].post.responses['201']"
+                    ).exists())
+                    .andExpect(jsonPath(
+                            "$.paths['/auth/registro'].post.responses['400']"
+                    ).exists())
+                    .andExpect(jsonPath(
+                            "$.paths['/auth/registro'].post.responses['409']"
+                    ).exists())
+
+                    // Inicio de sesión.
+                    .andExpect(jsonPath(
+                            "$.paths['/auth/login'].post.summary"
+                    ).value("Iniciar sesión"))
+
+                    // Consulta del usuario autenticado.
+                    .andExpect(jsonPath(
+                            "$.paths['/auth/me'].get.summary"
+                    ).value("Consultar el usuario autenticado"));
+        }
+
     }
 
-    /** Simula la configuración de application-prod.yml sin levantar MySQL. */
+    /**
+     * Simula la configuración de application-prod.yml sin levantar MySQL.
+     */
     @Nested
     @SpringBootTest(properties = {
             "springdoc.api-docs.enabled=false",
-            "springdoc.swagger-ui.enabled=false"
+            "springdoc.swagger-ui.enabled=false",
+            "spring.jpa.hibernate.ddl-auto=create-drop"
     })
     @AutoConfigureMockMvc
     @ActiveProfiles("test")
