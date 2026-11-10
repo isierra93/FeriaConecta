@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Comprueba que el backend acepte solicitudes preflight
  * desde los orígenes autorizados.
  */
-@SpringBootTest
+@SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class CorsConfigurationTest {

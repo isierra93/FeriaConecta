@@ -44,11 +44,11 @@ public class JwtService {
      * @param roles  roles asignados al usuario
      * @return token JWT firmado
      */
-    public String generarToken(long userId, Collection<String> roles) {
+    public String generarToken(int userId, Collection<String> roles) {
 
         //se verifica que el identificador sea valido
         if (userId <= 0) {
-            throw new IllegalArgumentException("El usuario no puede ser menor que 0");
+            throw new IllegalArgumentException("El identificador del usuario debe ser mayor que 0");
         }
 
         //el usuario debe tener almenos un rol
@@ -61,7 +61,7 @@ public class JwtService {
 
         //se define los dato incluidos en el token
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .subject(Long.toString(userId))
+                .subject(Integer.toString(userId))
                 .claim("roles", List.copyOf(roles))
                 .issuedAt(now)
                 .expiresAt(now.plus(jwtExpiration))

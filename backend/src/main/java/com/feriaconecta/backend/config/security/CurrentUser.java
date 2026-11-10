@@ -44,11 +44,11 @@ public class CurrentUser {
      *
      * @return identificador del usuario
      */
-    public Long getId() {
+    public Integer getId() {
         String subject = obtenerJwt().getSubject();
 
         try {
-            long id = Long.parseLong(subject);
+            int id = Integer.parseInt(subject);
 
             if (id <= 0) {
                 throw new NumberFormatException();

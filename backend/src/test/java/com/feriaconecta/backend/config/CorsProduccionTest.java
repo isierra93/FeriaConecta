@@ -19,8 +19,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Utiliza el perfil test para evitar conexiones a producción
  * y sobrescribe únicamente la propiedad de orígenes permitidos.
  */
-@SpringBootTest(properties =
-        "feriaconecta.cors.allowed-origins=https://feria-conecta.vercel.app")
+@SpringBootTest(properties = {
+        "feriaconecta.cors.allowed-origins=https://feria-conecta.vercel.app",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class CorsProduccionTest {
