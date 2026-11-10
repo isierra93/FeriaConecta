@@ -160,6 +160,78 @@ raíz de cada módulo, de qué módulos depende.
    - Asignar un puesto exige una postulación `CONFIRMADA` (`puesto` → `postulacion`),
      pero `postulacion` usa `puesto` para los cupos. Mismo criterio.
 
+
+## Catálogo de categorías (rubros)
+
+FeriaConecta utiliza un catálogo cerrado de categorías, compartido
+por los módulos de ferias y postulaciones.
+
+La definición se encuentra en el enum
+`com.feriaconecta.backend.common.model.Categoria`.
+
+### Categorías disponibles
+
+| Código | Nombre visible |
+|---|---|
+| `GASTRONOMIA` | Gastronomía |
+| `INDUMENTARIA` | Indumentaria |
+| `ACCESORIOS` | Accesorios y marroquinería |
+| `ARTESANIAS` | Artesanías |
+| `DECORACION` | Decoración y hogar |
+| `COSMETICA` | Cosmética y cuidado personal |
+| `PLANTAS` | Plantas y jardinería |
+| `LIBRERIA_PAPELERIA` | Librería y papelería |
+| `JUGUETES` | Juguetes y juegos |
+| `MASCOTAS` | Productos para mascotas |
+| `TECNOLOGIA` | Tecnología y electrónica |
+| `OTROS` | Otros |
+
+### Consulta pública
+
+**GET `/api/v1/public/categorias`**
+
+Devuelve una colección de objetos con los campos:
+
+- `codigo`: nombre de la constante del enum.
+- `nombre`: descripción legible para mostrar en el frontend.
+
+Ejemplo de respuesta HTTP 200:
+
+```json
+[
+  {
+    "codigo": "GASTRONOMIA",
+    "nombre": "Gastronomía"
+  },
+  {
+    "codigo": "INDUMENTARIA",
+    "nombre": "Indumentaria"
+  }
+]
+```
+
+El endpoint no requiere autenticación.
+
+### Uso en ferias y postulaciones
+
+- `feria.categoria_permitida` y `postulacion.rubro`
+  deben utilizar los códigos definidos en `Categoria`.
+- Los modelos JPA utilizan `@Enumerated(EnumType.STRING)` para persistir el
+  nombre de la constante en las columnas `VARCHAR` existentes.
+- La comparación entre categorías se realizará mediante
+  los valores del enum, evitando diferencias de escritura.
+- El frontend mostrará `nombre`, pero enviará `codigo`
+  en las solicitudes correspondientes.
+- Cada feria admite inicialmente una categoría.
+  El soporte para múltiples categorías requerirá
+  una modificación posterior del modelo de datos.
+- `OTROS` representa una categoría específica;
+  no equivale a permitir todos los rubros.
+
+Los códigos del enum forman parte del contrato de la API.
+Cualquier cambio de código deberá considerar su impacto
+sobre los datos persistidos y los clientes que consumen la API.
+
 ## Base de datos local (MySQL con Docker)
 
 `database/schema.sql` es la fuente de verdad del esquema. Hibernate **no** crea ni
