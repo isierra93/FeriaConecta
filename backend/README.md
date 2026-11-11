@@ -171,7 +171,7 @@ La definición se encuentra en el enum
 
 ### Categorías disponibles
 
-| Código | Nombre visible |
+| Código | Etiqueta visible |
 |---|---|
 | `GASTRONOMIA` | Gastronomía |
 | `INDUMENTARIA` | Indumentaria |
@@ -193,7 +193,7 @@ La definición se encuentra en el enum
 Devuelve una colección de objetos con los campos:
 
 - `codigo`: nombre de la constante del enum.
-- `nombre`: descripción legible para mostrar en el frontend.
+- `etiqueta`: descripción legible para mostrar en el frontend.
 
 Ejemplo de respuesta HTTP 200:
 
@@ -201,11 +201,11 @@ Ejemplo de respuesta HTTP 200:
 [
   {
     "codigo": "GASTRONOMIA",
-    "nombre": "Gastronomía"
+    "etiqueta": "Gastronomía"
   },
   {
     "codigo": "INDUMENTARIA",
-    "nombre": "Indumentaria"
+    "etiqueta": "Indumentaria"
   }
 ]
 ```
@@ -216,11 +216,12 @@ El endpoint no requiere autenticación.
 
 - `feria.categoria_permitida` y `postulacion.rubro`
   deben utilizar los códigos definidos en `Categoria`.
-- Los modelos JPA utilizan `@Enumerated(EnumType.STRING)` para persistir el
+- Las entidades JPA de ferias y postulaciones deberán utilizar
+  `@Enumerated(EnumType.STRING)` para persistir el
   nombre de la constante en las columnas `VARCHAR` existentes.
 - La comparación entre categorías se realizará mediante
   los valores del enum, evitando diferencias de escritura.
-- El frontend mostrará `nombre`, pero enviará `codigo`
+- El frontend mostrará `etiqueta`, pero enviará `codigo`
   en las solicitudes correspondientes.
 - Cada feria admite inicialmente una categoría.
   El soporte para múltiples categorías requerirá

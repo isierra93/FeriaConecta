@@ -80,7 +80,7 @@ public class OpenApiConfig {
                 tag(TAG_CREDENCIAL, "Credenciales QR: token UUID y generación bajo demanda del SVG."),
                 tag(TAG_ACREDITACION, "Acreditación por QR el día del evento."),
                 tag(TAG_PANEL, "Panel y reportes del organizador (solo lectura)."),
-                tag(TAG_PUBLICO, "Listado público de ferias, sin autenticación (solo lectura)."));
+                tag(TAG_PUBLICO, "Consultas públicas sin autenticación: listado de ferias y catálogo de categorías (solo lectura)."));
     }
 
     private static Tag tag(String name, String description) {
