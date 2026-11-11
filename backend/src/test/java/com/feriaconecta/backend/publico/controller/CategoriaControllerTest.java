@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Verifica que el catálogo de categorías esté disponible
- * públicamente y devuelva los códigos y nombres acordados.
+ * públicamente y devuelva los códigos y etiquetas acordados.
  */
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 @AutoConfigureMockMvc
@@ -37,10 +37,10 @@ class CategoriaControllerTest {
                                 .contextPath("/api/v1"))
                 .andExpect(status().isOk())
 
-                //la respuesta debe contener 12 categorias
+                // La respuesta debe contener 12 categorías.
                 .andExpect(jsonPath("$", hasSize(12)))
 
-                //verifica los codigos acordados por el equipo
+                // Verifica los códigos acordados por el equipo.
                 .andExpect(jsonPath("$[*].codigo", contains(
                         "GASTRONOMIA",
                         "INDUMENTARIA",
@@ -55,8 +55,8 @@ class CategoriaControllerTest {
                         "TECNOLOGIA",
                         "OTROS"
                 )))
-                //verifica los nombres visibles para frontend
-                .andExpect(jsonPath("$[*].nombre", contains(
+                // Verifica las etiquetas visibles para el frontend.
+                .andExpect(jsonPath("$[*].etiqueta", contains(
                         "Gastronomía",
                         "Indumentaria",
                         "Accesorios y marroquinería",

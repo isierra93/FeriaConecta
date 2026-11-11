@@ -6,12 +6,19 @@
   padding: 16px 24px;
   border-bottom: 1px solid var(--border);
 
-  nav {
+  flex-wrap: wrap;
+
+  nav,
+  .session {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
   }
 
-  nav a {
+  nav a,
+  .session a,
+  .link-button {
     padding: 4px 12px;
     border-radius: 6px;
     color: var(--text);
@@ -26,6 +33,21 @@
       background: var(--accent-bg);
     }
   }
+}
+
+.session-user {
+  color: var(--text-h);
+}
+
+.link-button {
+  border: none;
+  font: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.loading {
+  color: var(--text);
 }
 
 .brand {

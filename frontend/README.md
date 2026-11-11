@@ -107,14 +107,14 @@ la navegación principal (`MainLayout`) en `src/components`.
 
 ### Rutas protegidas
 
-El guard se implementa en el issue "Autenticación y registro de
-usuarios — Frontend". Las rutas protegidas se agrupan bajo un _layout
-route_ sin `path` que recibe los roles permitidos y renderiza un
-`<Outlet />` si el usuario cumple los requisitos:
+Las rutas protegidas se agrupan bajo un _layout route_ sin `path`
+(`src/components/ProtectedRoute.tsx`) que renderiza un `<Outlet />` si
+el usuario cumple los requisitos. `OrganizadorRoute` y
+`EmprendedorRoute` son el mismo guard con el rol ya fijado:
 
 ```ts
 {
-  Component: OrganizadorRoute, // guard con roles={['ORGANIZADOR']}
+  Component: OrganizadorRoute, // ProtectedRoute con roles={['ORGANIZADOR']}
   children: [
     { path: 'organizador/ferias', Component: MisFeriasPage },
     { path: 'acreditar/:token', Component: AcreditarPage },
@@ -122,12 +122,60 @@ route_ sin `path` que recibe los roles permitidos y renderiza un
 }
 ```
 
-- Sin sesión: redirige a `/login`, conservando la ruta solicitada para
-  volver después del inicio de sesión.
-- Con sesión pero sin el rol requerido: no muestra la pantalla
-  (el comportamiento exacto se define en el issue de autenticación).
+- Mientras se restaura la sesión: muestra "Cargando…".
+- Sin sesión: redirige a `/login` y guarda la ruta solicitada en
+  `location.state.from` para volver a ella al iniciar sesión o
+  registrarse.
+- Con sesión pero sin el rol requerido: muestra `AccessDeniedPage`
+  sin cambiar la URL.
+- `/login` y `/registro` están bajo `GuestRoute`: con sesión iniciada
+  redirigen a la ruta guardada (o a `/`). Es la única redirección
+  posterior al login; las pantallas no navegan por su cuenta.
 - El guard solo mejora la experiencia: la autorización real la aplica
   el backend en cada petición.
+
+## Autenticación
+
+La sesión vive en `AuthProvider` (`src/context/`), que envuelve al
+`RouterProvider` en `main.tsx`. Los componentes la leen con
+`useAuth()` (`src/hooks/`):
+
+```ts
+const { status, user, hasRole, login, register, logout } = useAuth()
+```
+
+- `status`: `loading` (restaurando), `authenticated` o `anonymous`.
+- `login` y `register` llaman a `/auth/login` y `/auth/registro`,
+  guardan el token y cargan el usuario desde `/auth/me`. Tras
+  registrarse, el usuario queda con la sesión iniciada. Si fallan,
+  lanzan `ApiRequestError` para que el formulario muestre el error.
+- Al recargar la página, si hay un token guardado y vigente, se
+  restaura la sesión consultando `/auth/me`.
+- `hasRole(...roles)` indica si el usuario tiene al menos uno de los
+  roles. Un usuario puede tener `ORGANIZADOR` y `EMPRENDEDOR`, y la
+  navegación muestra las secciones de ambos.
+
+### Expiración de la sesión
+
+La sesión se cierra (con el aviso "Tu sesión expiró" en el login) en
+dos casos:
+
+- El backend responde `401` a una petición que llevaba token
+  (`onUnauthorized` del cliente HTTP).
+- Llega el `exp` del JWT: se programa un temporizador al iniciar
+  sesión, sin esperar a la próxima petición. El `exp` se lee del
+  payload sin validar la firma (`src/api/jwt.ts`).
+
+### Almacenamiento del token
+
+El JWT se guarda en `localStorage` (clave `feriaconecta.token`). Es
+simple y sobrevive a la recarga de la página, pero cualquier script
+que se ejecute en la página puede leerlo, por lo que queda expuesto a
+XSS. Es una decisión aceptada para el alcance del proyecto; la
+mitigación es no insertar HTML sin escapar (React escapa por defecto)
+y no agregar scripts de terceros innecesarios. La alternativa más
+segura (cookie `HttpOnly` emitida por el backend) queda fuera de
+alcance.
 
 El rewrite de `vercel.json` hacia `index.html` permite acceder
 directamente o recargar cualquiera de estas rutas en el despliegue.
@@ -235,10 +283,6 @@ El origen `https://feria-conecta.vercel.app` está registrado en las
 variables `APP_FRONTEND_URL` y `CORS_ALLOWED_ORIGINS` del backend (stack
 de Portainer). Solo se permite el dominio de producción: las URLs de
 preview de Vercel no se agregan a CORS.
-
-> El backend todavía no aplica la configuración de CORS; se implementa en
-> el issue "Configurar CORS en el backend". Hasta entonces, las peticiones
-> desde el navegador hacia la API son bloqueadas.
 
 ### Verificación del despliegue
 

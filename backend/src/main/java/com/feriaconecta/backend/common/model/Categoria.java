@@ -2,10 +2,11 @@ package com.feriaconecta.backend.common.model;
 
 /**
  * Catálogo de categorías compartido por ferias y postulaciones.
- *
- * Los nombres de las constantes son los utilizados
- * por la API y para su persistencia en la base de datos.
- * El atributo nombre contiene el texto visible para el frontend.
+ * <p>
+ * El nombre de cada constante ({@link #name()}) es el código que utiliza la
+ * API y el que se persiste en las columnas {@code feria.categoria_permitida}
+ * y {@code postulacion.rubro}. La etiqueta es solo el texto visible para el
+ * frontend y nunca se persiste.
  */
 public enum Categoria {
 
@@ -22,13 +23,13 @@ public enum Categoria {
     TECNOLOGIA("Tecnología y electrónica"),
     OTROS("Otros");
 
-    private final String nombre;
+    private final String etiqueta;
 
-    Categoria(String nombre) {
-        this.nombre = nombre;
+    Categoria(String etiqueta) {
+        this.etiqueta = etiqueta;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getEtiqueta() {
+        return etiqueta;
     }
 }

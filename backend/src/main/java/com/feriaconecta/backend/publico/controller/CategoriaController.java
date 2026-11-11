@@ -26,18 +26,19 @@ import java.util.List;
 @SecurityRequirements()
 public class CategoriaController {
 
+    // El catálogo es fijo: se arma una sola vez en lugar de en cada request.
+    private static final List<CategoriaResponse> CATEGORIAS = Arrays.stream(Categoria.values())
+            .map(categoria -> new CategoriaResponse(categoria, categoria.getEtiqueta()))
+            .toList();
+
     /**
      * Devuelve todas las categorías definidas en el enum,
-     * incluyendo su código y nombre
+     * incluyendo su código y etiqueta.
      */
     @GetMapping
     @Operation(summary = "Listar categorías disponibles")
-    @ApiResponse(responseCode = "200", description = "Listado de categorias")
+    @ApiResponse(responseCode = "200", description = "Listado de categorías")
     public List<CategoriaResponse> listarCategorias() {
-        return Arrays.stream(Categoria.values())
-                .map(categoria -> new CategoriaResponse(
-                        categoria.name(), categoria.getNombre()
-                ))
-                .toList();
+        return CATEGORIAS;
     }
 }

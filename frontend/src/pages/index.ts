@@ -1,3 +1,8 @@
+export { AccessDeniedPage } from './AccessDeniedPage'
+export { EmprendedorPage } from './EmprendedorPage'
 export { FeriasPage } from './FeriasPage'
 export { HomePage } from './HomePage'
+export { LoginPage } from './LoginPage'
 export { NotFoundPage } from './NotFoundPage'
+export { OrganizadorPage } from './OrganizadorPage'
+export { RegistroPage } from './RegistroPage'
